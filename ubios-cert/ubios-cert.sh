@@ -1,5 +1,10 @@
 #!/bin/sh
 
+#
+# based on the fine work of kchristensen/udm-le
+# https://github.com/kchristensen/udm-le
+#
+
 set -e
 
 # Load environment variables
@@ -83,14 +88,19 @@ fi
 case $1 in
 initial)
 	# Create acme.sh directory so the container can write to it - owner "nobody"
-	if [ "$(stat -c '%u:%g' "${ACMESH_ROOT}")" != "65534:65534" ]; then
+	if [ ! -d "${ACMESH_ROOT}" ]; then
 		mkdir "${ACMESH_ROOT}"
+		echo "Created directory 'acme.sh'"
+	fi
+
+	if [ "$(stat -c '%u:%g' "${ACMESH_ROOT}")" != "65534:65534" ]; then
 		chown 65534:65534 "${ACMESH_ROOT}"
+		echo "Adjusted permissions for 'acme.sh'"
 	fi
 
 	echo "Attempting initial certificate generation"
 	remove_old_log
-	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && add_captive && unifi-os restart
+	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && unifi-os restart
 	;;
 renew)
 	echo "Attempting certificate renewal"
