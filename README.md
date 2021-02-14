@@ -1,6 +1,6 @@
 # Let's Encrypt certificates with DNS API for Ubiquiti UbiOS
 
-tl,dr; jump to [Installation](#Installation)
+**TL;DR** jump to [Installation](#Installation)
 
 ## What it does
 
@@ -44,7 +44,7 @@ In private installations, the UDM(P) will live behind a router / firewall provid
 
 A huge "Thank You" goes to
 
-* [kchristensen's lego for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
+* [kchristensen's udm-le for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
 * [boostchicken's udm-utilites](https://github.com/boostchicken/udm-utilities): the way to run stuff on UbiOS while surviving upgrades and reboots
 * [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh): the probably most convenient and most supported interface for Let's Encrypt.
 
