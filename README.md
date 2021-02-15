@@ -4,7 +4,7 @@
 
 ## What it does
 
-Bring beauty to your life - spare you from certificate errors when browsing to your UniFi Dream Machine (Pro).
+Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro).
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
@@ -13,7 +13,7 @@ This set of scripts is installed on devices with UbiOS, like the UniFi Dream Mac
 * renew your UDMP certificate,
 * survive device reboots and firmware upgrades thanks to [boostchicken's udm-utilities](https://github.com/boostchicken/udm-utilities) using its `on_boot.d` extension.
 
-As long as Ubiquiti does not change something in their config. Use at your own risk.
+This is valid as long as Ubiquiti does not change something in their config. Use at your own risk, you have been warned.
 
 ## Currently supported DNS API providers
 
@@ -52,10 +52,9 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-Status as of February 14, 2021:
+Status as of February 15, 2021:
 
-* The automated certificate update has not been tested
-* There is no e-Mail address being registered with the account, so you will not receive expiration emails from LE
+* There is no email address being registered with the LE account, so you will not receive expiration emails from LE. As they will renew automatically, this should have no effect.
 
 ## Installation
 
@@ -146,7 +145,9 @@ rm -irf ./ubios-cert
 
 ````
 
-Done.
+## Selecting the default CA
+
+`acme.sh`can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL and Buypass. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA).
 
 ## Debugging
 

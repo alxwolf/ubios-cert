@@ -28,7 +28,8 @@ deploy_cert() {
 		# Controller certificate
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_CERT_PATH}/unifi-core.crt
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_CERT_PATH}/unifi-core.key
-		chmod 644 ${UBIOS_CERT_PATH}/unifi-core.*
+		chmod 644 ${UBIOS_CERT_PATH}/unifi-core.crt
+		chmod 600 ${UBIOS_CERT_PATH}/unifi-core.key
 		NEW_CERT="yes"
 	else
 		echo "No new certificate was found, exiting without restart"
@@ -90,6 +91,7 @@ initial)
 	# Create acme.sh directory so the container can write to it - owner "nobody"
 	if [ ! -d "${ACMESH_ROOT}" ]; then
 		mkdir "${ACMESH_ROOT}"
+		chmod 700 "${ACMESH_ROOT}"
 		echo "Created directory 'acme.sh'"
 	fi
 
@@ -119,6 +121,11 @@ testdeploy)
 	echo "Attempting to deploy certificate"
 	deploy_cert
 	;;
+setdefaultca)
+	echo "Setting default CA to ${DEFAULT_CA}"
+	remove_old_log
+	${PODMAN_CMD} --set-default-ca  --server ${DEFAULT_CA}
+	;;	
 cleanup)
 	if [ -f "${CRON_FILE}" ]; then
 		rm "${CRON_FILE}"
