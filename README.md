@@ -10,8 +10,10 @@ This set of scripts is installed on devices with UbiOS, like the UniFi Dream Mac
 
 * issue [Let's Encrypt](https://letsencrypt.org) (LE) certificates for a domain you own,
 * use the DNS-01 challenge provided by [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh), so you don't have be present on the Internet with open ports 80 and 443,
-* renew your UDMP certificate every 60 days,
-* survive device reboots and firmware upgrades thanks to the [boostchicken's udm-utilities](https://github.com/boostchicken/udm-utilities) using its `on_boot.d` extension.
+* renew your UDMP certificate,
+* survive device reboots and firmware upgrades thanks to [boostchicken's udm-utilities](https://github.com/boostchicken/udm-utilities) using its `on_boot.d` extension.
+
+As long as Ubiquiti does not change something in their config. Use at your own risk.
 
 ## Currently supported DNS API providers
 
@@ -84,7 +86,7 @@ Archive:  ubios-cert-main.zip
 ````
 
 * [Make your adjustments](#make-your-adjustments) to `ubios-cert.env`
-* Move the files to their proper place
+* Move (or copy) the files to their proper place
 * Enter the directory /mnt/data/ubios-cert
 * Issue your certificate for the first time
 
@@ -99,6 +101,15 @@ Archive:  ubios-cert-main.zip
 Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `DNS_API_PROVIDER` and `DNS_API_ENV`.
 
 ## First Run
+
+Consider making a backup copy of your [current certificate and key](https://github.com/alxwolf/ubios-cert/wiki/Certificate-locations-on-UDM(P)) before moving on.
+
+````sh
+mkdir /mnt/data/ubioscert/certbackup
+cd /mnt/data/ubioscert/certbackup
+cp /mnt/data/unifi-os/unifi-core/config/unifi-core.key ./unifi-core.key_orig
+cp /mnt/data/unifi-os/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
+````
 
 Calling the script with `sh /mnt/data/ubios-cert/ubios-cert.sh initial` will
 
@@ -128,20 +139,16 @@ Here the script in `on_boot.d` will trigger execution of `sh /mnt/data/ubios-cer
 
 Then, you can delete the script directory. As always, be careful with `rm`.
 
-`````sh
+````sh
 cd /mnt/data/
 ./ubios-cert/ubios-cert.sh cleanup
 rm -irf ./ubios-cert
 
-`````
+````
 
 Done.
 
 ## Debugging
 
-* Increase the log level in `ubios-cert.sh` by setting `PODMAN_LOGLEVEL="--log-level 1"`
+* Increase the log level in `ubios-cert.sh` by setting `PODMAN_LOGLEVEL="--log-level 2"`
 * Run `tail -f /mnt/data/ubios-cert/acme.sh/acme.sh.log`in separate terminal while running `sh ubios-cert.sh initial`, `sh ubios-cert.sh renew` or `sh ubios-cert.sh bootrenew` manually
-
-## Beer money
-
-I have a full-time job outside IT. If this is useful for others, I'm happy if I can return something to the community.
