@@ -1,4 +1,4 @@
-# Let's Encrypt certificates with DNS API for Ubiquiti UbiOS
+# LManage SSL / TLS certificates (Let's Encrypt, ZeroSSL, Buypass)with acme.sh and DNS API for Ubiquiti UbiOS
 
 **TL;DR** jump to [Installation](#Installation)
 
@@ -8,7 +8,7 @@ Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
-* issue [Let's Encrypt](https://letsencrypt.org) (LE) certificates for a domain you own,
+* issue SSL / TLS certificates for a domain you own ([Let's Encrypt](https://letsencrypt.org) (LE), ZeroSSL or Buypass),
 * use the DNS-01 challenge provided by [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh), so you don't have be present on the Internet with open ports 80 and 443,
 * renew your UDMP certificate,
 * survive device reboots and firmware upgrades thanks to [boostchicken's udm-utilities](https://github.com/boostchicken/udm-utilities) using its `on_boot.d` extension.
@@ -16,10 +16,6 @@ This set of scripts is installed on devices with UbiOS, like the UniFi Dream Mac
 This is valid as long as Ubiquiti does not change something in their config. Use at your own risk, you have been warned.
 
 ## Currently supported DNS API providers
-
-This script has been explicitly tested with
-
-* [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
 
 Adjusting two variables in `ubios-cert.env` should allow access to many of more than 120 providers from [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). Adjust
 
@@ -29,6 +25,12 @@ DNS_API_ENV="..."
 `````
 
 to your liking and feel free to add to this repo. Some APIs may require additional manual preparation.
+
+This script has been explicitly tested with
+
+* [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
+
+Send a note if you succeeded with a different provider and I will list it here.
 
 ## But why?
 
