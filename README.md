@@ -1,4 +1,4 @@
-# LManage SSL / TLS certificates (Let's Encrypt, ZeroSSL, Buypass)with acme.sh and DNS API for Ubiquiti UbiOS
+# Manage SSL / TLS certificates (Let's Encrypt, ZeroSSL, Buypass)with acme.sh and DNS API for Ubiquiti UbiOS
 
 **TL;DR** jump to [Installation](#Installation)
 
