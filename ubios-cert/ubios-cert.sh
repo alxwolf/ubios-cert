@@ -36,14 +36,22 @@ deploy_cert() {
 	fi
 }
 
-add_captive(){
-	 # Import the certificate for the captive portal
-         if [ "$ENABLE_CAPTIVE" == "yes" ]; then
-         	podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
-         fi
+add_captive() {
+	# Import the certificate for the captive portal
+	if [ "$ENABLE_CAPTIVE" == "yes" ]; then
+		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
+	fi
 }
 
-remove_old_log(){
+add_radius() {
+	# Import the certificate for the RADIUS server
+	if [ "$ENABLE_RADIUS" == "yes" ]; then
+		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
+		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+	fi
+}
+remove_old_log() {
 	# Trash the previous logfile
 	if [ -f "${UBIOS_CERT_ROOT}/acme.sh/acme.sh.log" ]; then
 		rm "${UBIOS_CERT_ROOT}/acme.sh/acme.sh.log"
@@ -102,7 +110,7 @@ initial)
 
 	echo "Attempting initial certificate generation"
 	remove_old_log
-	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && unifi-os restart
+	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && add_radius && unifi-os restart
 	;;
 renew)
 	echo "Attempting certificate renewal"
@@ -115,7 +123,7 @@ renew)
 bootrenew)
 	echo "Attempting certificate renewal after boot"
 	remove_old_log
-	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && unifi-os restart
+	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && add_radius && unifi-os restart
 	;;
 testdeploy)
 	echo "Attempting to deploy certificate"
@@ -124,8 +132,8 @@ testdeploy)
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"
 	remove_old_log
-	${PODMAN_CMD} --set-default-ca  --server ${DEFAULT_CA}
-	;;	
+	${PODMAN_CMD} --set-default-ca --server ${DEFAULT_CA}
+	;;
 cleanup)
 	if [ -f "${CRON_FILE}" ]; then
 		rm "${CRON_FILE}"
