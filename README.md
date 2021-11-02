@@ -127,7 +127,7 @@ Should be fully automated, done via a daily `cron` job. You can trigger a manual
 
 ## Behaviour after firmware upgrade / reboot
 
-Here the script in `on_boot.d` will trigger execution of `sh /mnt/data/ubios-cert/ubios-cert.sh initial`, with a friendly delay of five minutes after boot.
+Here the script in `on_boot.d` will trigger execution of `sh /mnt/data/ubios-cert/ubios-cert.sh bootrenew`, with a friendly delay of five minutes after boot.
 
 ## De-installation and de-registration
 
