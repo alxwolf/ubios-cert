@@ -21,8 +21,6 @@ PODMAN_LOG="${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL}"
 NEW_CERT=""
 
 deploy_cert() {
-	# Re-write CERT_NAME if it is a wildcard cert. Replace * with _
-	ACME_CERT_NAME=${CERT_NAME/\*/_}
 #	if [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; then
 	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
 		echo "New certificate was generated, time to deploy it"
@@ -52,13 +50,17 @@ add_captive() {
 add_radius() {
 	echo "Checking if RADIUS server certificate needs update."
 	# Import the certificate for the RADIUS server
-	if [ "$ENABLE_RADIUS" == "yes" ]; then
-		echo "New certificate was generated, time to deploy it"
+	if [ "$ENABLE_RADIUS" == "yes" ] \
+		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; \
+		then
+		echo "New certificate was generated, time to deploy to RADIUS server"
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
 		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+		echo "New RADIUS certificate deployed."
 	fi
 }
+
 remove_old_log() {
 	# Trash the previous logfile
 	if [ -f "${UBIOS_CERT_ROOT}/acme.sh/acme.sh.log" ]; then
@@ -94,6 +96,10 @@ for DOMAIN in $(echo $CERT_HOSTS | tr "," "\n"); do
 	fi
 	PODMAN_DOMAINS="${PODMAN_DOMAINS} -d ${DOMAIN}"
 done
+
+# Re-write CERT_NAME if it is a wildcard cert. Replace * with _
+ACME_CERT_NAME=${CERT_NAME/\*/_}
+echo $ACME_CERT_NAME
 
 PODMAN_CMD="podman run --env-file=${UBIOS_CERT_ROOT}/ubios-cert.env -it --net=host --rm ${PODMAN_VOLUMES} ${PODMAN_ENV} ${PODMAN_IMAGE}"
 
