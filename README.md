@@ -24,19 +24,20 @@ DNS_API_PROVIDER="..."
 DNS_API_ENV="..."
 `````
 
-to your liking and feel free to add to this repo. Some APIs may require additional manual preparation.
+to your liking and feel free to add to this repo. Some APIs may require additional manual preparation, please check the [Wiki](https://github.com/alxwolf/ubios-cert/wiki).
 
 This script has been explicitly tested with
 
 * [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
+* [Cloudflare](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#1-cloudflare-option)
 
 Send a note if you succeeded with a different provider and I will list it here.
 
 ## But why?
 
 In private installations, the UDM(P) will live behind a router / firewall provided by an ISP, and we don't want to open HTTP(S) ports 80 and 443 to the interested public.
-
-[udm-le](https://github.com/kchristensen/udm-le) has a solution, but [LEGO](https://go-acme.github.io/lego/) does not support the German provider [all-inkl.com](https://all-inkl.com). This script does, and builds on kchristensen's work.
+~~[udm-le](https://github.com/kchristensen/udm-le) has a solution, but [LEGO](https://go-acme.github.io/lego/) does not support the German provider [all-inkl.com](https://all-inkl.com). This script does, and builds on kchristensen's work.~~
+[udm-le](https://github.com/kchristensen/udm-le) in the meantime also offers integration of [all-inkl.com](https://all-inkl.com).
 
 ## What you need
 

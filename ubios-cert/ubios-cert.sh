@@ -37,15 +37,19 @@ deploy_cert() {
 }
 
 add_captive() {
+	echo "Checking if Captive Portal certificate needs update."
 	# Import the certificate for the captive portal
 	if [ "$ENABLE_CAPTIVE" == "yes" ]; then
+		echo "New certificate was generated, time to deploy it"
 		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
 	fi
 }
 
 add_radius() {
+	echo "Checking if RADIUS server certificate needs update."
 	# Import the certificate for the RADIUS server
 	if [ "$ENABLE_RADIUS" == "yes" ]; then
+		echo "New certificate was generated, time to deploy it"
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
 		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
@@ -58,6 +62,19 @@ remove_old_log() {
 		echo "Removed old logfile"
 	fi
 }
+
+# Check for and if not exists create acme.sh directory so the container can write to it - owner "nobody"
+if [ ! -d "${ACMESH_ROOT}" ]; then
+	mkdir "${ACMESH_ROOT}"
+	chmod 700 "${ACMESH_ROOT}"
+	echo "Created directory 'acme.sh'"
+fi
+
+# Check for correct permissions and adjust if necessary
+if [ "$(stat -c '%u:%g' "${ACMESH_ROOT}")" != "65534:65534" ]; then
+	chown 65534:65534 "${ACMESH_ROOT}"
+	echo "Adjusted permissions for 'acme.sh'"
+fi	
 
 # Support multiple certificate SANs
 for DOMAIN in $(echo $CERT_HOSTS | tr "," "\n"); do
@@ -96,18 +113,6 @@ fi
 
 case $1 in
 initial)
-	# Create acme.sh directory so the container can write to it - owner "nobody"
-	if [ ! -d "${ACMESH_ROOT}" ]; then
-		mkdir "${ACMESH_ROOT}"
-		chmod 700 "${ACMESH_ROOT}"
-		echo "Created directory 'acme.sh'"
-	fi
-
-	if [ "$(stat -c '%u:%g' "${ACMESH_ROOT}")" != "65534:65534" ]; then
-		chown 65534:65534 "${ACMESH_ROOT}"
-		echo "Adjusted permissions for 'acme.sh'"
-	fi
-
 	echo "Attempting initial certificate generation"
 	remove_old_log
 	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && add_radius && unifi-os restart
@@ -128,6 +133,8 @@ bootrenew)
 testdeploy)
 	echo "Attempting to deploy certificate"
 	deploy_cert
+	add_captive
+	add_radius
 	;;
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"
