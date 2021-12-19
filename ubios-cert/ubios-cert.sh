@@ -40,7 +40,9 @@ deploy_cert() {
 add_captive() {
 	echo "Checking if Captive Portal certificate needs update."
 	# Import the certificate for the captive portal
-	if [ "$ENABLE_CAPTIVE" == "yes" ]; then
+	if [ "$ENABLE_CAPTIVE" == "yes" ] \
+		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; \
+		then
 		echo "New certificate was generated, time to deploy it"
 		# add key and full chain (sic!) to avoid getting the "no issuer certificate found" error from Java
 		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
@@ -97,7 +99,7 @@ for DOMAIN in $(echo $CERT_HOSTS | tr "," "\n"); do
 	PODMAN_DOMAINS="${PODMAN_DOMAINS} -d ${DOMAIN}"
 done
 
-# Re-write CERT_NAME if it is a wildcard cert. Replace * with _
+# Re-write CERT_NAME if it is a wildcard cert. Replace '*' with '_'
 ACME_CERT_NAME=${CERT_NAME/\*/_}
 
 PODMAN_CMD="podman run --env-file=${UBIOS_CERT_ROOT}/ubios-cert.env -it --net=host --rm ${PODMAN_VOLUMES} ${PODMAN_ENV} ${PODMAN_IMAGE}"
@@ -154,24 +156,9 @@ bootrenew)
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && add_radius && unifi-os restart
 	;;
-testdeploy)
-	echo "Copying certificate without restarting UniFi OS"
-	deploy_cert
-	add_captive
-	add_radius
-	;;
 deploy)
 	echo "Deploying certificates and restarting UniFi OS"
 	deploy_cert && 	add_captive && add_radius && unifi-os restart
-	;;
-addcaptive)
-	add_captive
-	;;
-addradius)
-	add_radius
-	;;
-removecert)
-	remove_cert
 	;;
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"

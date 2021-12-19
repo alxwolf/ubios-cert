@@ -8,7 +8,7 @@ Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
-* issue SSL / TLS certificates for a domain you own ([Let's Encrypt](https://letsencrypt.org) (LE), ZeroSSL or Buypass),
+* issue SSL / TLS certificates for a domain you own ([Let's Encrypt](https://letsencrypt.org) (LE), and others like ZeroSSL, Buypass, SSL.com),
 * use the DNS-01 challenge provided by [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh), so you don't have be present on the Internet with open ports 80 and 443,
 * renew your UDMP certificate,
 * survive device reboots and firmware upgrades thanks to [boostchicken's udm-utilities](https://github.com/boostchicken/udm-utilities) using its `on_boot.d` extension.
@@ -51,13 +51,14 @@ A huge "Thank You" goes to
 
 * [kchristensen's udm-le for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
 * [boostchicken's udm-utilites](https://github.com/boostchicken/udm-utilities): the way to run stuff on UbiOS while surviving upgrades and reboots
-* [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh): the probably most convenient and most supported interface for Let's Encrypt.
+* [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh): the probably most convenient and most supported interface for Let's Encrypt, ZeoSSL, Buypass and SSL.com.
 
 ## Known bugs and unknowns
 
 Status as of February 15, 2021:
 
 * There is no email address being registered with the LE account, so you will not receive expiration emails from LE. As they will renew automatically, this should have no effect.
+* ZeroSSL requires an email-address, too. Didn't use it (as they do not provide SANs). Feel free to create a pull request if you bring other CAs to action.
 
 ## Installation
 
@@ -126,6 +127,8 @@ Calling the script with `sh /mnt/data/ubios-cert/ubios-cert.sh initial` will
 
 Should be fully automated, done via a daily `cron` job. You can trigger a manual renewal by running `sh /mnt/data/ubios-cert/ubios-cert.sh renew`, which may be useful for debugging. If `acme.sh`fails, check if you hit the [rate limits](https://letsencrypt.org/docs/rate-limits/).
 
+The certificate can be force-renewed by running `sh /mnt/data/ubios-cert/ubios-cert.sh forcerenew`.
+
 ## Behaviour after firmware upgrade / reboot
 
 Here the script in `on_boot.d` will trigger execution of `sh /mnt/data/ubios-cert/ubios-cert.sh bootrenew`, with a friendly delay of five minutes after boot.
@@ -150,7 +153,7 @@ rm -irf ./ubios-cert
 
 ## Selecting the default CA
 
-`acme.sh`can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL and Buypass. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA).
+`acme.sh` can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL and Buypass. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`.
 
 ## Debugging
 
