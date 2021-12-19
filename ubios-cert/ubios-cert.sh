@@ -23,12 +23,15 @@ NEW_CERT=""
 deploy_cert() {
 	# Re-write CERT_NAME if it is a wildcard cert. Replace * with _
 	ACME_CERT_NAME=${CERT_NAME/\*/_}
-	if [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; then
+#	if [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; then
+	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
 		echo "New certificate was generated, time to deploy it"
 		# Controller certificate
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_CERT_PATH}/unifi-core.crt
+		#cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_CERT_PATH}/unifi-core.crt
+		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_CERT_PATH}/unifi-core.crt
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_CERT_PATH}/unifi-core.key
 		chmod 644 ${UBIOS_CERT_PATH}/unifi-core.crt
+		chmod 644 ${UBIOS_CERT_PATH}/ca.cer
 		chmod 600 ${UBIOS_CERT_PATH}/unifi-core.key
 		NEW_CERT="yes"
 	else
@@ -41,6 +44,7 @@ add_captive() {
 	# Import the certificate for the captive portal
 	if [ "$ENABLE_CAPTIVE" == "yes" ]; then
 		echo "New certificate was generated, time to deploy it"
+		# add key and full chain (sic!)
 		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
 	fi
 }
@@ -61,6 +65,13 @@ remove_old_log() {
 		rm "${UBIOS_CERT_ROOT}/acme.sh/acme.sh.log"
 		echo "Removed old logfile"
 	fi
+}
+
+remove_cert() {
+	echo "Executing: ${PODMAN_CMD} --remove ${PODMAN_DOMAINS}"
+	remove_old_log
+	${PODMAN_CMD} --remove ${PODMAN_DOMAINS}
+	echo "Removed certificates from acme.sh renewal. The certificate files can now manually be removed."
 }
 
 # Check for and if not exists create acme.sh directory so the container can write to it - owner "nobody"
@@ -125,16 +136,37 @@ renew)
 		add_captive && unifi-os restart
 	fi
 	;;
+forcerenew)
+	echo "Forcing certificate renewal"
+	remove_old_log
+	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --force --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert
+	if [ "${NEW_CERT}" = "yes" ]; then
+		add_captive && unifi-os restart
+	fi
+	;;
 bootrenew)
 	echo "Attempting certificate renewal after boot"
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && add_radius && unifi-os restart
 	;;
 testdeploy)
-	echo "Attempting to deploy certificate"
+	echo "Copying certificate without restarting UniFi OS"
 	deploy_cert
 	add_captive
 	add_radius
+	;;
+deploy)
+	echo "Deploying certificates and restarting UniFi OS"
+	deploy_cert && 	add_captive && add_radius && unifi-os restart
+	;;
+addcaptive)
+	add_captive
+	;;
+addradius)
+	add_radius
+	;;
+removecert)
+	remove_cert
 	;;
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"
@@ -154,10 +186,7 @@ cleanup)
 
 	if [ -f "${ACMESH_ROOT}/account.conf" ]; then
 		remove_old_log
-		echo "Executing: ${PODMAN_CMD} --remove ${PODMAN_DOMAINS}"
-		${PODMAN_CMD} --remove ${PODMAN_DOMAINS}
-		echo "Removed certificates from LE account"
-
+		remove_cert
 		echo "Executing: ${PODMAN_CMD} --deactivate-account"
 		${PODMAN_CMD} --deactivate-account
 		echo "Deactivated LE account"
