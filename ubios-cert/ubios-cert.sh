@@ -24,7 +24,7 @@ deploy_cert() {
 #	if [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; then
 	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
 		echo "New certificate was generated, time to deploy it"
-		# Controller certificate
+		# Controller certificate - copy the full chain certificates to unifi-core.crt to avoid Java cert store command error
 		#cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_CERT_PATH}/unifi-core.crt
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_CERT_PATH}/unifi-core.crt
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_CERT_PATH}/unifi-core.key
@@ -42,7 +42,7 @@ add_captive() {
 	# Import the certificate for the captive portal
 	if [ "$ENABLE_CAPTIVE" == "yes" ]; then
 		echo "New certificate was generated, time to deploy it"
-		# add key and full chain (sic!)
+		# add key and full chain (sic!) to avoid getting the "no issuer certificate found" error from Java
 		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
 	fi
 }
@@ -99,7 +99,6 @@ done
 
 # Re-write CERT_NAME if it is a wildcard cert. Replace * with _
 ACME_CERT_NAME=${CERT_NAME/\*/_}
-echo $ACME_CERT_NAME
 
 PODMAN_CMD="podman run --env-file=${UBIOS_CERT_ROOT}/ubios-cert.env -it --net=host --rm ${PODMAN_VOLUMES} ${PODMAN_ENV} ${PODMAN_IMAGE}"
 
