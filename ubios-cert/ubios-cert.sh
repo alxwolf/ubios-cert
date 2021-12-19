@@ -29,7 +29,6 @@ deploy_cert() {
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_CERT_PATH}/unifi-core.crt
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_CERT_PATH}/unifi-core.key
 		chmod 644 ${UBIOS_CERT_PATH}/unifi-core.crt
-		chmod 644 ${UBIOS_CERT_PATH}/ca.cer
 		chmod 600 ${UBIOS_CERT_PATH}/unifi-core.key
 		NEW_CERT="yes"
 	else
