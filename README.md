@@ -4,7 +4,7 @@
 
 ## What it does
 
-Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro).
+Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro)'s administrative page and guest portal.
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
@@ -55,10 +55,11 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-Status as of February 15, 2021:
+Status as of December 25, 2021:
 
 * There is no email address being registered with the LE account, so you will not receive expiration emails from LE. As they will renew automatically, this should have no effect.
 * ZeroSSL requires an email-address, too. Didn't use it (as they do not provide SANs). Feel free to create a pull request if you bring other CAs to action.
+* The RADIUS server certificates are not updated. There is a separate branch `radius_cert_update` addressing this topic.
 
 ## Installation
 

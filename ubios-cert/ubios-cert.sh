@@ -48,24 +48,6 @@ add_captive() {
 	fi
 }
 
-add_radius() {
-	echo "Checking if RADIUS server certificate needs update."
-	# Import the certificate for the RADIUS server
-	if [ "$ENABLE_RADIUS" == "yes" ] \
-		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; \
-		then
-		echo "New certificate was generated, time to deploy to RADIUS server"
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/ca.pem
-		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
-		chmod 644 ${UBIOS_RADIUS_CERT_PATH}/ca.pem
-		echo "New RADIUS certificate deployed."
-		/usr/sbin/rc.radiusd restart
-		echo "RADIUS server restarted."
-	fi
-}
-
 remove_old_log() {
 	# Trash the previous logfile
 	if [ -f "${UBIOS_CERT_ROOT}/acme.sh/acme.sh.log" ]; then
@@ -136,7 +118,7 @@ case $1 in
 initial)
 	echo "Attempting initial certificate generation"
 	remove_old_log
-	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && add_radius && unifi-os restart
+	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && unifi-os restart
 	;;
 renew)
 	echo "Attempting certificate renewal"
@@ -157,11 +139,11 @@ forcerenew)
 bootrenew)
 	echo "Attempting certificate renewal after boot"
 	remove_old_log
-	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && add_radius && unifi-os restart
+	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && unifi-os restart
 	;;
 deploy)
 	echo "Deploying certificates and restarting UniFi OS"
-	deploy_cert && 	add_captive && add_radius && unifi-os restart
+	deploy_cert && 	add_captive && unifi-os restart
 	;;
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"
