@@ -57,8 +57,12 @@ add_radius() {
 		echo "New certificate was generated, time to deploy to RADIUS server"
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/ca.pem
 		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+		chmod 644 ${UBIOS_RADIUS_CERT_PATH}/ca.pem
 		echo "New RADIUS certificate deployed."
+		/usr/sbin/rc.radiusd restart
+		echo "RADIUS server restarted."
 	fi
 }
 
