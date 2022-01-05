@@ -109,8 +109,8 @@ Adjust file `ubios-cert.env` to your liking. You typically only need to touch en
 Consider making a backup copy of your [current certificate and key](https://github.com/alxwolf/ubios-cert/wiki/Certificate-locations-on-UDM(P)) before moving on.
 
 ````sh
-mkdir /mnt/data/ubioscert/certbackup
-cd /mnt/data/ubioscert/certbackup
+mkdir /mnt/data/ubios-cert/certbackup
+cd /mnt/data/ubios-cert/certbackup
 cp /mnt/data/unifi-os/unifi-core/config/unifi-core.key ./unifi-core.key_orig
 cp /mnt/data/unifi-os/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
 ````
