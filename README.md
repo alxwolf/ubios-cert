@@ -36,14 +36,11 @@ Send a note if you succeeded with a different provider and I will list it here.
 ## But why?
 
 In private installations, the UDM(P) will live behind a router / firewall provided by an ISP, and we don't want to open HTTP(S) ports 80 and 443 to the interested public.
-~~[udm-le](https://github.com/kchristensen/udm-le) has a solution, but [LEGO](https://go-acme.github.io/lego/) does not support the German provider [all-inkl.com](https://all-inkl.com). This script does, and builds on kchristensen's work.~~
-[udm-le](https://github.com/kchristensen/udm-le) in the meantime also offers integration of [all-inkl.com](https://all-inkl.com).
 
 ## What you need
 
 * A UniFi Dream Machine (Pro),
 * a registered domain where you have API access for running "Let's Encrypt"'s DNS-API challenge
-* a sense of adventure
 
 ## Inspired by - Sources and Credits
 
@@ -55,11 +52,13 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-Status as of December 25, 2021:
-
 * There is no email address being registered with the LE account, so you will not receive expiration emails from LE. As they will renew automatically, this should have no effect.
 * ZeroSSL requires an email-address, too. Didn't use it (as they do not provide SANs). Feel free to create a pull request if you bring other CAs to action.
 * The RADIUS server certificates are not updated. There is a separate branch `radius_cert_update` addressing this topic.
+
+## UniFi OS and Network Controller Versions
+
+Confirmed to work on UniFi OS Version 1.11.4 and Network Version 7.0.23
 
 ## Installation
 
