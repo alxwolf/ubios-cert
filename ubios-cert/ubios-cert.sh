@@ -118,6 +118,7 @@ case $1 in
 initial)
 	echo "Attempting initial certificate generation"
 	remove_old_log
+	${PODMAN_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
 	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && unifi-os restart
 	;;
 renew)

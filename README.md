@@ -52,8 +52,6 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-* There is no email address being registered with the LE account, so you will not receive expiration emails from LE. As they will renew automatically, this should have no effect.
-* ZeroSSL requires an email-address, too. Didn't use it (as they do not provide SANs). Feel free to create a pull request if you bring other CAs to action.
 * The RADIUS server certificates are not updated. There is a separate branch `radius_cert_update` addressing this topic.
 
 ## UniFi OS and Network Controller Versions
@@ -101,7 +99,7 @@ Archive:  ubios-cert-main.zip
 
 ### Make your adjustments
 
-Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `DNS_API_PROVIDER` and `DNS_API_ENV`.
+Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `DNS_API_PROVIDER`, `DNS_API_ENV` and `CA_REGISTRATION_EMAIL`.
 
 ## First Run
 
@@ -119,6 +117,7 @@ Calling the script with `sh /mnt/data/ubios-cert/ubios-cert.sh initial` will
 * setup up the trigger for persistence over reboot / firmware upgrades
 * establish a cron job to take care about your certificate renewals
 * create a directory for `acme.sh`
+* register an account with your email
 * issue a certificate (with SANs, if you like)
 * deploy the certificate to your network controller (and captive portal, if you selected that)
 * restart the unifi-os
