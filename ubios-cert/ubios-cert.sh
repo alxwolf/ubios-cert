@@ -13,12 +13,16 @@ set -e
 # Setup variables for later for those who want to tinker around
 PODMAN_VOLUMES="-v ${ACMESH_ROOT}:/acme.sh"
 PODMAN_ENV="${DNS_API_ENV}"
-PODMAN_IMAGE="neilpang/acme.sh"
+PODMAN_IMAGE="neilpang/acme.sh:latest"
 PODMAN_LOGFILE="--log /acme.sh/acme.sh.log"
 PODMAN_LOGLEVEL="--log-level 1" # default is 1, can be increased to 2
 PODMAN_LOG="${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL}"
 
 NEW_CERT=""
+
+pull_latest() {
+	podman pull ${PODMAN_IMAGE}
+}
 
 deploy_cert() {
 #	if [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; then
@@ -113,6 +117,10 @@ if [ -f "${ACMESH_ROOT}/account.conf" ]; then
 		chmod 600 ${ACMESH_ROOT}/account.conf
 	fi
 fi
+
+# pull the latest image
+echo "Attempting to pull most recent container image"
+pull_latest
 
 case $1 in
 initial)
