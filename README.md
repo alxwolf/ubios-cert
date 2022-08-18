@@ -152,7 +152,7 @@ rm -irf ./ubios-cert
 
 ## Selecting the default CA
 
-`acme.sh` can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL and Buypass. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`.
+`acme.sh` can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL, Buypass, SSL.com and Google. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). The keywords are listed [here](https://github.com/acmesh-official/acme.sh/wiki/Server). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`. This CA will **from now on** be applied to newly issued certificates.
 
 ## Debugging
 
