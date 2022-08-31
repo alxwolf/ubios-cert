@@ -21,6 +21,7 @@ PODMAN_LOG="${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL}"
 NEW_CERT=""
 
 pull_latest() {
+	echo "Attempting to pull most recent container image"
 	podman pull ${PODMAN_IMAGE}
 }
 
@@ -135,18 +136,16 @@ if [ -f "${ACMESH_ROOT}/account.conf" ]; then
 	fi
 fi
 
-# pull the latest image
-echo "Attempting to pull most recent container image"
-pull_latest
-
 case $1 in
 initial)
+	pull_latest
 	echo "Attempting initial certificate generation"
 	remove_old_log
 	${PODMAN_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
 	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && unifi-os restart
 	;;
 renew)
+	pull_latest
 	echo "Attempting certificate renewal"
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert
@@ -155,6 +154,7 @@ renew)
 	fi
 	;;
 forcerenew)
+	pull_latest
 	echo "Forcing certificate renewal"
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --force --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert
@@ -163,6 +163,7 @@ forcerenew)
 	fi
 	;;
 bootrenew)
+	pull_latest
 	echo "Attempting certificate renewal after boot"
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && unifi-os restart
@@ -172,6 +173,7 @@ deploy)
 	deploy_cert && 	add_captive && unifi-os restart
 	;;
 setdefaultca)
+	pull_latest
 	echo "Setting default CA to ${DEFAULT_CA}"
 	remove_old_log
 	${PODMAN_CMD} --set-default-ca --server ${DEFAULT_CA}
