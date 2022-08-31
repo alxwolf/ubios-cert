@@ -41,15 +41,32 @@ deploy_cert() {
 }
 
 add_captive() {
-	echo "Checking if Captive Portal certificate needs update."
+	echo "Checking if Guest Hotspot Portal and WiFiman certificate needs update."
 	# Import the certificate for the captive portal
 	if [ "$ENABLE_CAPTIVE" == "yes" ] \
 		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; \
 		then
 		echo "New certificate was generated, time to deploy it"
+		# full chain no longer works - we keep it in if Ubiquiti comes to a better conclusion (including full chain)
 		# add key and full chain (sic!) to avoid getting the "no issuer certificate found" error from Java
-		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
-	fi
+		# podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
+		
+		# add a single certificate without chain (this seems to be required by WiFiMan since 1.11 or so)
+		# extract just the server certificate
+		podman exec -it unifi-os openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core.crt -out ${UNIFIOS_CERT_PATH}/unifi-core-server-only.crt
+		
+		# mangle cert and key into P12 format
+		podman exec -it unifi-os openssl pkcs12 -export -inkey ${UNIFIOS_CERT_PATH}/unifi-core.key -in ${UNIFIOS_CERT_PATH}/unifi-core-server-only.crt -out ${UNIFIOS_CERT_PATH}/unifi-core-key-plus-server-only-cert.p12 -name unifi -password pass:aircontrolenterprise
+		
+		# make a backup copy of keystore
+		podman exec -it unifi-os cp /usr/lib/unifi/data/keystore /usr/lib/unifi/data/keystore.backup
+		
+		# remove the existing key called 'unifi'
+		podman exec -it unifi-os keytool -delete -alias unifi -keystore /usr/lib/unifi/data/keystore -deststorepass aircontrolenterprise
+		
+		# finally, import the p12 formatted cert+key of server only into keystore
+		podman exec -it unifi-os keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core-key-plus-server-only-cert.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
+ 		fi
 }
 
 remove_old_log() {
