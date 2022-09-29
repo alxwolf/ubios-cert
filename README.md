@@ -33,6 +33,8 @@ This script has been explicitly tested with
 
 Send a note if you succeeded with a different provider and I will list it here.
 
+**Potentially breaking change:** all-inkl.com has decided to end support of `sha1`authentication, so password must be provided (and stored...) in clear text now. I don't judge...
+
 ## But why?
 
 In private installations, the UDM(P) will live behind a router / firewall provided by an ISP, and we don't want to open HTTP(S) ports 80 and 443 to the interested public.
