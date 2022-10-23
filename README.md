@@ -4,7 +4,7 @@
 
 ## What it does
 
-Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro)'s administrative page and guest portal.
+Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro/SE)'s administrative page and guest portal.
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
@@ -30,6 +30,7 @@ This script has been explicitly tested with
 
 * [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
 * [Cloudflare](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#1-cloudflare-option)
+* [GoDaddy](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#4-use-godaddycom-domain-api-to-automatically-issue-cert)
 
 Send a note if you succeeded with a different provider and I will list it here.
 
@@ -41,7 +42,7 @@ In private installations, the UDM(P) will live behind a router / firewall provid
 
 ## What you need
 
-* A UniFi Dream Machine (Pro),
+* A UniFi Dream Machine / Pro / SE / UDR,
 * a registered domain where you have API access for running "Let's Encrypt"'s DNS-API challenge
 
 ## Inspired by - Sources and Credits
@@ -58,7 +59,7 @@ A huge "Thank You" goes to
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 1.11.4 and Network Version 7.0.23
+Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Version 7.0.23, 7.2.94
 
 ## Installation
 
@@ -69,56 +70,54 @@ Confirmed to work on UniFi OS Version 1.11.4 and Network Version 7.0.23
 * Unzip it
 
 ````sh
-# cd
-# curl -JLO https://github.com/alxwolf/ubios-cert/archive/main.zip
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   121    0   121    0     0    489      0 --:--:-- --:--:-- --:--:--   489
-100  5877    0  5877    0     0  12167      0 --:--:-- --:--:-- --:--:-- 12167
-curl: Saved to filename 'ubios-cert-main.zip'
-# unzip ubios-cert-main.zip 
-Archive:  ubios-cert-main.zip
-   creating: ubios-cert-main/
-  inflating: ubios-cert-main/LICENSE
-  inflating: ubios-cert-main/README.md
-   creating: ubios-cert-main/ubios-cert/
-   creating: ubios-cert-main/ubios-cert/on_boot.d/
-  inflating: ubios-cert-main/ubios-cert/on_boot.d/99-ubios-cert.sh
-  inflating: ubios-cert-main/ubios-cert/ubios-cert.env
-  inflating: ubios-cert-main/ubios-cert/ubios-cert.sh
+cd
+curl -L https://github.com/llaforest/ubios-cert/archive/main.zip > ubios-cert-main.zip
+unzip ubios-cert-main.zip
+chmod +x ubios-cert-main/deploy.sh
 ````
 
 * [Make your adjustments](#make-your-adjustments) to `ubios-cert.env`
 * Move (or copy) the files to their proper place
-* Enter the directory /mnt/data/ubios-cert
+````sh
+vi ubios-cert-main/ubios-cert/ubios-cert.env
+./ubios-cert-main/deploy.sh
+````
+* Navigate to the deployment folder
 * Issue your certificate for the first time
 
 ````sh
-# mv ubios-cert-main/ubios-cert /mnt/data/
-# rm -irf ubios-cert-main*
-# cd /mnt/data/ubios-cert/
+cd ${DATA_DIR}/ubios-cert
+./ubios-cert.sh initial
 ````
 
 ### Make your adjustments
 
-Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `DNS_API_PROVIDER`, `DNS_API_ENV` and `CA_REGISTRATION_EMAIL`.
+Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `CA_REGISTRATION_EMAIL`, `DNS_API_PROVIDER` and 
+the specific vars related to your dns provider.
+
+## Data Dir
+
+On unifi-os 1.x machines such as Dream Machine and Dream Machine Pro, the data folder is `/mnt/data`
+On unifi-os 2.x machines such as Dream Machine SE and Dream Router, the data folder is `/data/`
+
+This behavior is handled once by the `deploy.sh` script which will replace in files occurences of it
+This folder will be referred as `${DATA_DIR}` in the exemples bellow.
 
 ## First Run
 
 Consider making a backup copy of your [current certificate and key](https://github.com/alxwolf/ubios-cert/wiki/Certificate-locations-on-UDM(P)) before moving on.
 
 ````sh
-mkdir /mnt/data/ubios-cert/certbackup
-cd /mnt/data/ubios-cert/certbackup
-cp /mnt/data/unifi-os/unifi-core/config/unifi-core.key ./unifi-core.key_orig
-cp /mnt/data/unifi-os/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
+mkdir ${DATA_DIR}/ubios-cert/certbackup
+cd ${DATA_DIR}/ubios-cert/certbackup
+cp /data/unifi-core/config/unifi-core.key ./unifi-core.key_orig
+cp /data/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
 ````
 
-Calling the script with `sh /mnt/data/ubios-cert/ubios-cert.sh initial` will
+Calling the script with `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh initial` will
 
 * setup up the trigger for persistence over reboot / firmware upgrades
 * establish a cron job to take care about your certificate renewals
-* create a directory for `acme.sh`
 * register an account with your email
 * issue a certificate (with SANs, if you like)
 * deploy the certificate to your network controller (and captive portal, if you selected that)
@@ -126,27 +125,27 @@ Calling the script with `sh /mnt/data/ubios-cert/ubios-cert.sh initial` will
 
 ## Certificate Renewal
 
-Should be fully automated, done via a daily `cron` job. You can trigger a manual renewal by running `sh /mnt/data/ubios-cert/ubios-cert.sh renew`, which may be useful for debugging. If `acme.sh`fails, check if you hit the [rate limits](https://letsencrypt.org/docs/rate-limits/).
+Should be fully automated, done via a daily `cron` job. You can trigger a manual renewal by running `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh renew`, which may be useful for debugging. If `acme.sh`fails, check if you hit the [rate limits](https://letsencrypt.org/docs/rate-limits/).
 
-The certificate can be force-renewed by running `sh /mnt/data/ubios-cert/ubios-cert.sh forcerenew`.
+The certificate can be force-renewed by running `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh forcerenew`.
 
 ## Behaviour after firmware upgrade / reboot
 
-Here the script in `on_boot.d` will trigger execution of `sh /mnt/data/ubios-cert/ubios-cert.sh bootrenew`, with a friendly delay of five minutes after boot.
+Here the script in `on_boot.d` will trigger execution of `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh bootrenew`, with a friendly delay of five minutes after boot.
 
 ## De-installation and de-registration
 
 `ssh` into your UDMP. Calling the script with parameter `cleanup` will
 
 * Remove the cron file from `/etc/cron.d´
-* Remove the boot trigger from `/mnt/data/on_boot.d/´
+* Remove the boot trigger from `${DATA_DIR}/on_boot.d/´
 * Remove the (most recently issued) domains from the Let's Encrypt account
 * De-activate the Let's Encrypt account
 
 Then, you can delete the script directory. As always, be careful with `rm`.
 
 ````sh
-cd /mnt/data/
+cd ${DATA_DIR}/
 ./ubios-cert/ubios-cert.sh cleanup
 rm -irf ./ubios-cert
 
@@ -158,5 +157,5 @@ rm -irf ./ubios-cert
 
 ## Debugging
 
-* Increase the log level in `ubios-cert.sh` by setting `PODMAN_LOGLEVEL="--log-level 2"`
-* Run `tail -f /mnt/data/ubios-cert/acme.sh/acme.sh.log`in separate terminal while running `sh ubios-cert.sh initial`, `sh ubios-cert.sh renew` or `sh ubios-cert.sh bootrenew` manually
+* Increase the log level in `ubios-cert.sh` by setting `LOGLEVEL="--log-level 2"`
+* Run `tail -f ${DATA_DIR}/ubios-cert/acme.sh/acme.sh.log`in separate terminal while running `sh ubios-cert.sh initial`, `sh ubios-cert.sh renew` or `sh ubios-cert.sh bootrenew` manually
