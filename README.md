@@ -63,6 +63,14 @@ Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Versio
 
 ## Installation
 
+## Data Dir
+
+On unifi-os 1.x machines such as Dream Machine and Dream Machine Pro, the data folder is `/mnt/data`
+On unifi-os 2.x machines such as Dream Machine SE and Dream Router, the data folder is `/data/`
+
+This behavior is handled once by the `deploy.sh` script which will replace in files occurences of it.
+This folder will be referred as `${DATA_DIR}` in the examples below.
+
 ### Download the package
 
 * `ssh` into your UDM
@@ -99,14 +107,6 @@ Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Versio
 ### Make your adjustments
 
 Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `CA_REGISTRATION_EMAIL`, `DNS_API_PROVIDER` and the specific exports related to your dns provider.
-
-## Data Dir
-
-On unifi-os 1.x machines such as Dream Machine and Dream Machine Pro, the data folder is `/mnt/data`
-On unifi-os 2.x machines such as Dream Machine SE and Dream Router, the data folder is `/data/`
-
-This behavior is handled once by the `deploy.sh` script which will replace in files occurences of it.
-This folder will be referred as `${DATA_DIR}` in the examples below.
 
 ## First Run
 

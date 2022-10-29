@@ -34,4 +34,4 @@ chmod +x ${SCRIPT_DIR}/ubios-cert/ubios-cert.sh ${SCRIPT_DIR}/ubios-cert/on_boot
 mv "${SCRIPT_DIR}/ubios-cert/" "${DATA_DIR}/ubios-cert/"
 rm -rf ${SCRIPT_DIR}/../ubios-cert-main ~/ubios-cert.zip
 echo "Deployed with success in ${DATA_DIR}/ubios-cert"
-cd ~
+cd ${DATA_DIR}/ubios-cert

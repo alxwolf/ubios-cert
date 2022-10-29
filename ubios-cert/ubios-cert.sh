@@ -154,7 +154,7 @@ fi
 case $1 in
 initial)
 	echo "Attempting initial certificate generation"
-	remove_old_log
+	setdefaultca
 	${ACME_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
 	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && unifos_restart
 	;;
