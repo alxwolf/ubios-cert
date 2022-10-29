@@ -64,7 +64,7 @@ add_captive() {
 unifos_restart () {
 	if [ "${IS_UNIFI_2}" = 'false' ]; then
 		echo "Please wait while restarting unifi using 'unifios restart'"
-		unif-os restart
+		unifi-os restart
 	else 
 		echo "Please wait while restarting unifi-core using 'systemctl restart unifi-core'"
 		# Restarting the network app with 'restart unifi' has no effect on cert. The whole unifi-os has to be reloaded.
