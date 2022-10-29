@@ -153,8 +153,10 @@ fi
 
 case $1 in
 initial)
+	remove_old_log
+	echo "Setting default CA to ${DEFAULT_CA}"
+	${ACME_CMD} --set-default-ca --server ${DEFAULT_CA}
 	echo "Attempting initial certificate generation"
-	setdefaultca
 	${ACME_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
 	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && unifos_restart
 	;;
