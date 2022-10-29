@@ -142,8 +142,8 @@ Here the script in `on_boot.d` will trigger execution of `sh ${DATA_DIR}/ubios-c
 
 `ssh` into your UDM. Calling the script with parameter `cleanup` will
 
-* Remove the cron file from `/etc/cron.d´
-* Remove the boot trigger from `${DATA_DIR}/on_boot.d/´
+* Remove the cron file from `/etc/cron.d`
+* Remove the boot trigger from `${DATA_DIR}/on_boot.d/`
 * Remove the (most recently issued) domains from the Let's Encrypt account
 * De-activate the Let's Encrypt account
 
