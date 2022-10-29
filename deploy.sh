@@ -21,12 +21,12 @@ case "$(ubnt-device-info model || true)" in
 	echo "UDR/UDM SE detected, installing ubios-cert in /data..."
 	sed -i 's#/mnt/data#/data#g' "${SCRIPT_DIR}/ubios-cert/ubios-cert.env" "${SCRIPT_DIR}/ubios-cert/ubios-cert.sh" "${SCRIPT_DIR}/ubios-cert/on_boot.d/99-ubios-cert.sh"
 	DATA_DIR="/data"
+	export DATA_DIR
 	;;
 	*)
 	echo "Unsupported model: $(ubnt-device-info model)" 1>&2
 	exit 1
 	;;
-	export DATA_DIR
 esac
 echo
 

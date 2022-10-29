@@ -89,8 +89,7 @@ Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Versio
   ./deploy.sh
   ```
 
-* Navigate to the deployment folder
-* Issue your certificate for the first time
+* Navigate to the deployment folder and issue your certificate for the first time
 
   ```sh
   cd ${DATA_DIR}/ubios-cert
