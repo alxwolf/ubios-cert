@@ -17,11 +17,11 @@ This is valid as long as Ubiquiti does not change something in their config. Use
 
 ## Currently supported DNS API providers
 
-Adjusting two variables in `ubios-cert.env` should allow access to many of more than 120 providers from [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). Adjust
+Adjusting variables in `ubios-cert.env` should allow access to many of more than 120 providers from [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). Adjust
 
-`````sh
+```sh
 export DNS_API_PROVIDER="..."
-`````
+```
 
 and corresponding other environment variables to your liking and feel free to add to this repo. Some APIs may require additional manual preparation, please check the [Wiki](https://github.com/alxwolf/ubios-cert/wiki).
 
@@ -51,6 +51,7 @@ A huge "Thank You" goes to
 * [kchristensen's udm-le for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
 * [boostchicken's udm-utilites](https://github.com/boostchicken/udm-utilities): the way to run stuff on UbiOS while surviving upgrades and reboots
 * [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh): the probably most convenient and most supported interface for Let's Encrypt, ZeoSSL, Buypass and SSL.com.
+* [llaforest](https://github.com/llaforest): for implementing the native / bare metal version of `acme.sh`
 
 ## Known bugs and unknowns
 
