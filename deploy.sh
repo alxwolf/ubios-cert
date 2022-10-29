@@ -3,7 +3,7 @@ set -e
 SCRIPT_DIR=$(dirname ${0})
 
 deploy_acmesh() {
-	echo "Acme.sh will be deployed inside ubios-cert to persist firmware updates"
+	echo "acme.sh will be deployed inside ubios-cert to persist firmware updates"
 	ACME_URL=$(curl -s https://api.github.com/repos/acmesh-official/acme.sh/releases/latest | grep tarball_url | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
 	echo "Fetching latest ACME from ${ACME_URL}"
 	curl -L "${ACME_URL}" > acmesh.tar.gz 

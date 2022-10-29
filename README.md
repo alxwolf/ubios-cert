@@ -71,17 +71,18 @@ Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Versio
 
   ```sh
   cd
-  curl -L https://github.com/alxwolf/ubios-cert/archive/baremetal.zip > ubios-cert.zip
+  curl -L https://github.com/alxwolf/ubios-cert/archive/main.zip > ubios-cert.zip
   unzip ubios-cert.zip
-  chmod +x ubios-cert/deploy.sh
+  cd ubios-cert-main.zip
+  chmod +x deploy.sh
   ```
 
 * [Make your adjustments](#make-your-adjustments) to `ubios-cert.env`
-* Move (or copy) the files to their proper place
+* Deploy the files to their proper place
   
   ```sh
-  vi ubios-cert/ubios-cert/ubios-cert.env
-  ./ubios-cert/deploy.sh
+  vi ubios-cert/ubios-cert.env
+  ./deploy.sh
   ```
 
 * Navigate to the deployment folder
