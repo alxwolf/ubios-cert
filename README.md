@@ -4,7 +4,7 @@
 
 ## What it does
 
-Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro).
+Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro)'s administrative page and guest portal.
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
@@ -33,17 +33,16 @@ This script has been explicitly tested with
 
 Send a note if you succeeded with a different provider and I will list it here.
 
+**Potentially breaking change:** all-inkl.com has decided to end support of `sha1`authentication, so password must be provided (and stored...) in clear text now. I don't judge...
+
 ## But why?
 
 In private installations, the UDM(P) will live behind a router / firewall provided by an ISP, and we don't want to open HTTP(S) ports 80 and 443 to the interested public.
-~~[udm-le](https://github.com/kchristensen/udm-le) has a solution, but [LEGO](https://go-acme.github.io/lego/) does not support the German provider [all-inkl.com](https://all-inkl.com). This script does, and builds on kchristensen's work.~~
-[udm-le](https://github.com/kchristensen/udm-le) in the meantime also offers integration of [all-inkl.com](https://all-inkl.com).
 
 ## What you need
 
 * A UniFi Dream Machine (Pro),
 * a registered domain where you have API access for running "Let's Encrypt"'s DNS-API challenge
-* a sense of adventure
 
 ## Inspired by - Sources and Credits
 
@@ -55,10 +54,11 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-Status as of February 15, 2021:
+* The RADIUS server certificates are not updated. There is a separate branch `radius_cert_update` addressing this topic.
 
-* There is no email address being registered with the LE account, so you will not receive expiration emails from LE. As they will renew automatically, this should have no effect.
-* ZeroSSL requires an email-address, too. Didn't use it (as they do not provide SANs). Feel free to create a pull request if you bring other CAs to action.
+## UniFi OS and Network Controller Versions
+
+Confirmed to work on UniFi OS Version 1.11.4 and Network Version 7.0.23
 
 ## Installation
 
@@ -101,15 +101,15 @@ Archive:  ubios-cert-main.zip
 
 ### Make your adjustments
 
-Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `DNS_API_PROVIDER` and `DNS_API_ENV`.
+Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `DNS_API_PROVIDER`, `DNS_API_ENV` and `CA_REGISTRATION_EMAIL`.
 
 ## First Run
 
 Consider making a backup copy of your [current certificate and key](https://github.com/alxwolf/ubios-cert/wiki/Certificate-locations-on-UDM(P)) before moving on.
 
 ````sh
-mkdir /mnt/data/ubioscert/certbackup
-cd /mnt/data/ubioscert/certbackup
+mkdir /mnt/data/ubios-cert/certbackup
+cd /mnt/data/ubios-cert/certbackup
 cp /mnt/data/unifi-os/unifi-core/config/unifi-core.key ./unifi-core.key_orig
 cp /mnt/data/unifi-os/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
 ````
@@ -119,6 +119,7 @@ Calling the script with `sh /mnt/data/ubios-cert/ubios-cert.sh initial` will
 * setup up the trigger for persistence over reboot / firmware upgrades
 * establish a cron job to take care about your certificate renewals
 * create a directory for `acme.sh`
+* register an account with your email
 * issue a certificate (with SANs, if you like)
 * deploy the certificate to your network controller (and captive portal, if you selected that)
 * restart the unifi-os
@@ -153,7 +154,7 @@ rm -irf ./ubios-cert
 
 ## Selecting the default CA
 
-`acme.sh` can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL and Buypass. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`.
+`acme.sh` can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL, Buypass, SSL.com and Google. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). The keywords are listed [here](https://github.com/acmesh-official/acme.sh/wiki/Server). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`. This CA will **from now on** be applied to newly issued certificates.
 
 ## Debugging
 

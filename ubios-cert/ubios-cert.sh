@@ -13,12 +13,17 @@ set -e
 # Setup variables for later for those who want to tinker around
 PODMAN_VOLUMES="-v ${ACMESH_ROOT}:/acme.sh"
 PODMAN_ENV="${DNS_API_ENV}"
-PODMAN_IMAGE="neilpang/acme.sh"
+PODMAN_IMAGE="neilpang/acme.sh:latest"
 PODMAN_LOGFILE="--log /acme.sh/acme.sh.log"
 PODMAN_LOGLEVEL="--log-level 1" # default is 1, can be increased to 2
 PODMAN_LOG="${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL}"
 
 NEW_CERT=""
+
+pull_latest() {
+	echo "Attempting to pull most recent container image"
+	podman pull ${PODMAN_IMAGE}
+}
 
 deploy_cert() {
 #	if [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; then
@@ -37,33 +42,32 @@ deploy_cert() {
 }
 
 add_captive() {
-	echo "Checking if Captive Portal certificate needs update."
+	echo "Checking if Guest Hotspot Portal and WiFiman certificate needs update."
 	# Import the certificate for the captive portal
 	if [ "$ENABLE_CAPTIVE" == "yes" ] \
 		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; \
 		then
 		echo "New certificate was generated, time to deploy it"
+		# full chain no longer works - we keep it in if Ubiquiti comes to a better conclusion (including full chain)
 		# add key and full chain (sic!) to avoid getting the "no issuer certificate found" error from Java
-		podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
-	fi
-}
-
-add_radius() {
-	echo "Checking if RADIUS server certificate needs update."
-	# Import the certificate for the RADIUS server
-	if [ "$ENABLE_RADIUS" == "yes" ] \
-		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; \
-		then
-		echo "New certificate was generated, time to deploy to RADIUS server"
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/ca.pem
-		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
-		chmod 644 ${UBIOS_RADIUS_CERT_PATH}/ca.pem
-		echo "New RADIUS certificate deployed."
-		/usr/sbin/rc.radiusd restart
-		echo "RADIUS server restarted."
-	fi
+		# podman exec -it unifi-os ${CERT_IMPORT_CMD} ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core.crt
+		
+		# add a single certificate without chain (this seems to be required by WiFiMan since 1.11 or so)
+		# extract just the server certificate
+		podman exec -it unifi-os openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core.crt -out ${UNIFIOS_CERT_PATH}/unifi-core-server-only.crt
+		
+		# mangle cert and key into P12 format
+		podman exec -it unifi-os openssl pkcs12 -export -inkey ${UNIFIOS_CERT_PATH}/unifi-core.key -in ${UNIFIOS_CERT_PATH}/unifi-core-server-only.crt -out ${UNIFIOS_CERT_PATH}/unifi-core-key-plus-server-only-cert.p12 -name unifi -password pass:aircontrolenterprise
+		
+		# make a backup copy of keystore
+		podman exec -it unifi-os cp /usr/lib/unifi/data/keystore /usr/lib/unifi/data/keystore.backup
+		
+		# remove the existing key called 'unifi'
+		podman exec -it unifi-os keytool -delete -alias unifi -keystore /usr/lib/unifi/data/keystore -deststorepass aircontrolenterprise
+		
+		# finally, import the p12 formatted cert+key of server only into keystore
+		podman exec -it unifi-os keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core-key-plus-server-only-cert.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
+ 		fi
 }
 
 remove_old_log() {
@@ -134,11 +138,14 @@ fi
 
 case $1 in
 initial)
+	pull_latest
 	echo "Attempting initial certificate generation"
 	remove_old_log
-	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && add_radius && unifi-os restart
+	${PODMAN_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
+	${PODMAN_CMD} --issue ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert && add_captive && unifi-os restart
 	;;
 renew)
+	pull_latest
 	echo "Attempting certificate renewal"
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert
@@ -147,6 +154,7 @@ renew)
 	fi
 	;;
 forcerenew)
+	pull_latest
 	echo "Forcing certificate renewal"
 	remove_old_log
 	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --force --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOG} && deploy_cert
@@ -155,15 +163,17 @@ forcerenew)
 	fi
 	;;
 bootrenew)
+	pull_latest
 	echo "Attempting certificate renewal after boot"
 	remove_old_log
-	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && add_radius && unifi-os restart
+	${PODMAN_CMD} --renew ${PODMAN_DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${PODMAN_LOGFILE} ${PODMAN_LOGLEVEL} && deploy_cert && add_captive && unifi-os restart
 	;;
 deploy)
 	echo "Deploying certificates and restarting UniFi OS"
-	deploy_cert && 	add_captive && add_radius && unifi-os restart
+	deploy_cert && 	add_captive && unifi-os restart
 	;;
 setdefaultca)
+	pull_latest
 	echo "Setting default CA to ${DEFAULT_CA}"
 	remove_old_log
 	${PODMAN_CMD} --set-default-ca --server ${DEFAULT_CA}
