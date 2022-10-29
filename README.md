@@ -73,15 +73,19 @@ Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Versio
   cd
   curl -L https://github.com/alxwolf/ubios-cert/archive/main.zip > ubios-cert.zip
   unzip ubios-cert.zip
-  cd ubios-cert-main.zip
+  cd ubios-cert-main
   chmod +x deploy.sh
   ```
 
 * [Make your adjustments](#make-your-adjustments) to `ubios-cert.env`
-* Deploy the files to their proper place
   
   ```sh
   vi ubios-cert/ubios-cert.env
+  ```
+
+* Deploy the files to their proper place
+
+  ```sh
   ./deploy.sh
   ```
 

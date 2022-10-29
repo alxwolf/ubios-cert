@@ -26,11 +26,12 @@ case "$(ubnt-device-info model || true)" in
 	echo "Unsupported model: $(ubnt-device-info model)" 1>&2
 	exit 1
 	;;
+	export DATA_DIR
 esac
 echo
 
 deploy_acmesh
 chmod +x ${SCRIPT_DIR}/ubios-cert/ubios-cert.sh ${SCRIPT_DIR}/ubios-cert/on_boot.d/99-ubios-cert.sh
 mv "${SCRIPT_DIR}/ubios-cert/" "${DATA_DIR}/ubios-cert/"
-rm -rf ${SCRIPT_DIR}/../ubios-ddns-main*
+rm -rf ${SCRIPT_DIR}/../ubios-cert-main ubios-cert.zip
 echo "Deployed with success in ${DATA_DIR}/ubios-cert"
