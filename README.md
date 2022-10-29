@@ -1,6 +1,6 @@
 # Manage SSL / TLS certificates (Let's Encrypt, ZeroSSL, Buypass) with acme.sh and DNS API for Ubiquiti UbiOS
 
-**TL;DR** jump to [Installation](#Installation)
+**TL;DR** jump to [Installation](#installation)
 
 ## What it does
 
@@ -20,15 +20,14 @@ This is valid as long as Ubiquiti does not change something in their config. Use
 Adjusting two variables in `ubios-cert.env` should allow access to many of more than 120 providers from [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). Adjust
 
 `````sh
-DNS_API_PROVIDER="..."
-DNS_API_ENV="..."
+export DNS_API_PROVIDER="..."
 `````
 
-to your liking and feel free to add to this repo. Some APIs may require additional manual preparation, please check the [Wiki](https://github.com/alxwolf/ubios-cert/wiki).
+and corresponding other environment variables to your liking and feel free to add to this repo. Some APIs may require additional manual preparation, please check the [Wiki](https://github.com/alxwolf/ubios-cert/wiki).
 
 This script has been explicitly tested with
 
-* [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
+* [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi2#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
 * [Cloudflare](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#1-cloudflare-option)
 * [GoDaddy](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#4-use-godaddycom-domain-api-to-automatically-issue-cert)
 
@@ -65,54 +64,55 @@ Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Versio
 
 ### Download the package
 
-* `ssh` into your UDMP
+* `ssh` into your UDM
 * Download the archive to your home directory
 * Unzip it
 
-````sh
-cd
-curl -L https://github.com/llaforest/ubios-cert/archive/main.zip > ubios-cert-main.zip
-unzip ubios-cert-main.zip
-chmod +x ubios-cert-main/deploy.sh
-````
+  ```sh
+  cd
+  curl -L https://github.com/alxwolf/ubios-cert/archive/baremetal.zip > ubios-cert.zip
+  unzip ubios-cert.zip
+  chmod +x ubios-cert/deploy.sh
+  ```
 
 * [Make your adjustments](#make-your-adjustments) to `ubios-cert.env`
 * Move (or copy) the files to their proper place
-````sh
-vi ubios-cert-main/ubios-cert/ubios-cert.env
-./ubios-cert-main/deploy.sh
-````
+  
+  ```sh
+  vi ubios-cert/ubios-cert/ubios-cert.env
+  ./ubios-cert/deploy.sh
+  ```
+
 * Navigate to the deployment folder
 * Issue your certificate for the first time
 
-````sh
-cd ${DATA_DIR}/ubios-cert
-./ubios-cert.sh initial
-````
+  ```sh
+  cd ${DATA_DIR}/ubios-cert
+  ./ubios-cert.sh initial
+  ```
 
 ### Make your adjustments
 
-Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `CA_REGISTRATION_EMAIL`, `DNS_API_PROVIDER` and 
-the specific vars related to your dns provider.
+Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `CA_REGISTRATION_EMAIL`, `DNS_API_PROVIDER` and the specific exports related to your dns provider.
 
 ## Data Dir
 
 On unifi-os 1.x machines such as Dream Machine and Dream Machine Pro, the data folder is `/mnt/data`
 On unifi-os 2.x machines such as Dream Machine SE and Dream Router, the data folder is `/data/`
 
-This behavior is handled once by the `deploy.sh` script which will replace in files occurences of it
-This folder will be referred as `${DATA_DIR}` in the exemples bellow.
+This behavior is handled once by the `deploy.sh` script which will replace in files occurences of it.
+This folder will be referred as `${DATA_DIR}` in the examples below.
 
 ## First Run
 
 Consider making a backup copy of your [current certificate and key](https://github.com/alxwolf/ubios-cert/wiki/Certificate-locations-on-UDM(P)) before moving on.
 
-````sh
+```sh
 mkdir ${DATA_DIR}/ubios-cert/certbackup
 cd ${DATA_DIR}/ubios-cert/certbackup
 cp /data/unifi-core/config/unifi-core.key ./unifi-core.key_orig
 cp /data/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
-````
+```
 
 Calling the script with `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh initial` will
 
@@ -135,7 +135,7 @@ Here the script in `on_boot.d` will trigger execution of `sh ${DATA_DIR}/ubios-c
 
 ## De-installation and de-registration
 
-`ssh` into your UDMP. Calling the script with parameter `cleanup` will
+`ssh` into your UDM. Calling the script with parameter `cleanup` will
 
 * Remove the cron file from `/etc/cron.d´
 * Remove the boot trigger from `${DATA_DIR}/on_boot.d/´
@@ -144,12 +144,11 @@ Here the script in `on_boot.d` will trigger execution of `sh ${DATA_DIR}/ubios-c
 
 Then, you can delete the script directory. As always, be careful with `rm`.
 
-````sh
+```sh
 cd ${DATA_DIR}/
 ./ubios-cert/ubios-cert.sh cleanup
 rm -irf ./ubios-cert
-
-````
+```
 
 ## Selecting the default CA
 
