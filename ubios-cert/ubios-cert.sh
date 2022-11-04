@@ -119,7 +119,7 @@ done
 ACME_CERT_NAME=$(echo "${CERT_NAME}" | sed -r 's/\*/_/g')
 
 ACME_HOME="--config-home ${UBIOS_CERT_ROOT}/acme.sh --cert-home ${UBIOS_CERT_ROOT}/acme.sh --home ${UBIOS_CERT_ROOT}/acme.sh"
-ACME_CMD="${UBIOS_CERT_ROOT}/acme.sh/acme.sh ${ACME_HOME}"
+ACME_CMD="${UBIOS_CERT_ROOT}/acme.sh/acme.sh ${ACMESH_CMD_PARAMS} ${ACME_HOME}"
 
 
 # Setup persistent on_boot.d trigger
