@@ -108,6 +108,8 @@ This folder will be referred as `${DATA_DIR}` in the examples below.
 
 Adjust file `ubios-cert.env` to your liking. You typically only need to touch environment variables `CERT_HOSTS`, `CA_REGISTRATION_EMAIL`, `DNS_API_PROVIDER` and the specific exports related to your dns provider.
 
+Advanced: you can pass additional command line options to `acme.sh` by editing environment variable `ACMESH_CMD_PARAMS`.
+
 ## First Run
 
 Consider making a backup copy of your [current certificate and key](https://github.com/alxwolf/ubios-cert/wiki/Certificate-locations-on-UDM(P)) before moving on.
