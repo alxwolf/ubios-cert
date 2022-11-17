@@ -136,10 +136,13 @@ CRON_FILE='/etc/cron.d/ubios-cert'
 if [ ! -f "${CRON_FILE}" ]; then
 	echo "0 3 * * * sh ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
 	chmod 644 ${CRON_FILE}
-	if [ ${IS_UNIFI_2} = 'false' ]; then 
-		/etc/init.d/cron reload ${CRON_FILE}
-	else 
+	if [ -f /etc/init.d/crond ]; then
 		/etc/init.d/crond reload ${CRON_FILE}
+	elif [ -f /etc/init.d/cron ]; then
+		/etc/init.d/cron reload ${CRON_FILE}
+	else
+		echo "ERROR: Could not find cron service at /etc/init.d/crond or /etc/init.d/cron" >&2
+		exit 1
 	fi
 	echo "Restored cron file"
 fi
