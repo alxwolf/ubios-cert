@@ -11,7 +11,7 @@ set -e
 . /mnt/data/ubios-cert/ubios-cert.env
 
 # Setup variables for later for those who want to tinker around
-LOGFILE='--log acme.sh/acme.sh.log'
+LOGFILE="--log ${ACMESH_ROOT}/acme.sh.log"
 LOGLEVEL='--log-level 1' # default is 1, can be increased to 2
 LOG="${LOGFILE} ${LOGLEVEL}"
 
@@ -74,8 +74,8 @@ unifos_restart () {
 
 remove_old_log() {
 	# Trash the previous logfile
-	if [ -f "${UBIOS_CERT_ROOT}/acme.sh/acme.sh.log" ]; then
-		rm "${UBIOS_CERT_ROOT}"/acme.sh/acme.sh.log
+	if [ -f "${ACMESH_ROOT}/acme.sh.log" ]; then
+		rm ${ACMESH_ROOT}/acme.sh.log
 		echo "Removed old logfile"
 	fi
 }
@@ -118,8 +118,8 @@ done
 # Re-write CERT_NAME if it is a wildcard cert. Replace '*' with '_'
 ACME_CERT_NAME=$(echo "${CERT_NAME}" | sed -r 's/\*/_/g')
 
-ACME_HOME="--config-home ${UBIOS_CERT_ROOT}/acme.sh --cert-home ${UBIOS_CERT_ROOT}/acme.sh --home ${UBIOS_CERT_ROOT}/acme.sh"
-ACME_CMD="${UBIOS_CERT_ROOT}/acme.sh/acme.sh ${ACMESH_CMD_PARAMS} ${ACME_HOME}"
+ACME_HOME="--config-home ${ACMESH_ROOT} --cert-home ${ACMESH_ROOT} --home ${ACMESH_ROOT}"
+ACME_CMD="${ACMESH_ROOT}/acme.sh ${ACMESH_CMD_PARAMS} ${ACME_HOME}"
 
 
 # Setup persistent on_boot.d trigger
@@ -134,7 +134,7 @@ fi
 # Setup nightly cron job
 CRON_FILE='/etc/cron.d/ubios-cert'
 if [ ! -f "${CRON_FILE}" ]; then
-	echo "0 3 * * * sh ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
+	echo "0 3 * * * ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
 	chmod 644 ${CRON_FILE}
 	if [ -f /etc/init.d/crond ]; then
 		/etc/init.d/crond reload ${CRON_FILE}
@@ -164,8 +164,10 @@ initial)
 	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && unifos_restart
 	;;
 renew)
-	echo "Attempting certificate renewal"
 	remove_old_log
+	echo "Attempting acme.sh upgrade"
+	${ACME_CMD} --upgrade
+	echo "Attempting certificate renewal"
 	${ACME_CMD} --renew ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert
 	if [ "${NEW_CERT}" = "yes" ]; then
 		add_captive && unifos_restart
