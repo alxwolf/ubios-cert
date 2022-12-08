@@ -4,7 +4,7 @@
 
 ## What it does
 
-Spare you from certificate errors when browsing to your UniFi Dream Machine (Pro/SE)'s administrative page and guest portal.
+Spare you from certificate errors when browsing to your UniFi Dream Machine (Base / Pro / SE / R)'s administrative page and guest portal.
 
 This set of scripts is installed on devices with UbiOS, like the UniFi Dream Machine Pro (UDMP), and will
 
@@ -30,6 +30,7 @@ This script has been explicitly tested with
 * [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi2#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
 * [Cloudflare](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#1-cloudflare-option)
 * [GoDaddy](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#4-use-godaddycom-domain-api-to-automatically-issue-cert)
+* [Route53](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#10-use-amazon-route53-domain-api)
 
 Send a note if you succeeded with a different provider and I will list it here.
 
@@ -48,10 +49,11 @@ In private installations, the UDM(P) will live behind a router / firewall provid
 
 A huge "Thank You" goes to
 
-* [kchristensen's udm-le for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
-* [boostchicken's udm-utilites](https://github.com/boostchicken/udm-utilities): the way to run stuff on UbiOS while surviving upgrades and reboots
 * [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh): the probably most convenient and most supported interface for Let's Encrypt, ZeoSSL, Buypass and SSL.com.
 * [llaforest](https://github.com/llaforest): for implementing the native / bare metal version of `acme.sh`
+* [boostchicken's udm-utilites](https://github.com/boostchicken/udm-utilities): the way to run stuff on UbiOS while surviving upgrades and reboots
+* [kchristensen's udm-le for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
+
 
 ## Known bugs and unknowns
 
@@ -59,7 +61,7 @@ A huge "Thank You" goes to
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 1.11.4, 1.12.30, 2.5.11 and Network Version 7.0.23, 7.2.94
+Confirmed to work on UniFi OS Version 1.11.4, 1.12.33, 2.5.11 and Network Version 7.0.23, 7.2.95
 
 ## Installation
 
