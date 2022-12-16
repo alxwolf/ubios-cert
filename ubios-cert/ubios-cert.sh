@@ -17,6 +17,10 @@ LOG="${LOGFILE} ${LOGLEVEL}"
 
 NEW_CERT='no'
 IS_UNIFI_2='false'
+if [ $(ubnt-device-info firmware || true) > 2 ]
+ then
+	 IS_UNIFI_2='true'
+fi
 
 deploy_cert() {
 	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
@@ -86,13 +90,6 @@ remove_cert() {
 	${ACME_CMD} --remove ${DOMAINS}
 	echo "Removed certificates from acme.sh renewal. The certificate files can now manually be removed."
 }
-
-# When running in UDM SE / UDR, the applications are not running in containers
-case "$(ubnt-device-info model || true)" in "UniFi Dream Machine SE"|"UniFi Dream Router")
-	# But here, the same command will be executed but inside unifi-os container
-	IS_UNIFI_2='true'
-	;;
-esac
 
 # Check for and if not exists create acme.sh directory so the container can write to it - owner "nobody"
 if [ ! -d "${ACMESH_ROOT}" ]; then
