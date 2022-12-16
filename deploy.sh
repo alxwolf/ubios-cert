@@ -7,7 +7,7 @@ export DATA_DIR="/mnt/data"
 # Get the firmware version
 export FIRMWARE_VER=$(ubnt-device-info firmware || true)
 # Get the Harware Model
-export MODEL=$(ubnt-device-info model || true)
+export MODEL="$(ubnt-device-info model || true)"
 
 deploy_acmesh() {
 	echo "acme.sh will be deployed inside ubios-cert to persist firmware updates"
@@ -30,7 +30,7 @@ case "${MODEL}" in
 	echo "${MODEL} running firmware ${FIRMWARE_VER} detected, installing ubios-cert in ${DATA_DIR}..."
 	;;
 	*)
-	echo "Unsupported model: $(ubnt-device-info model)" 1>&2
+	echo "Unsupported model: ${MODEL}"
 	exit 1
 	;;
 esac
