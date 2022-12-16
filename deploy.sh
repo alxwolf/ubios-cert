@@ -4,6 +4,10 @@ SCRIPT_DIR=$(dirname ${0})
 
 # Set default data path
 export DATA_DIR="/mnt/data"
+# Get the firmware version
+export FIRMWARE_VER=$(ubnt-device-info firmware || true)
+# Get the Harware Model
+export MODEL=$(ubnt-device-info model || true)
 
 deploy_acmesh() {
 	echo "acme.sh will be deployed inside ubios-cert to persist firmware updates"
@@ -15,16 +19,15 @@ deploy_acmesh() {
 	tar -xvf acmesh.tar.gz --directory="${SCRIPT_DIR}/ubios-cert/acme.sh" --strip-components=1 
 }
 
-if [ $(ubnt-device-info firmware || true) > 2 ]
+if [ ${FIRMWARE_VER} > 2 ]
  then
         sed -i 's#/mnt/data#/data#g' "${SCRIPT_DIR}/ubios-cert/ubios-cert.env" "${SCRIPT_DIR}/ubios-cert/ubios-cert.sh" "${SCRIPT_DIR}/ubios-cert/on_boot.d/99-ubios-cert.sh"
         export DATA_DIR="/data"
 fi
 
-MODEL=$(ubnt-device-info model || true)
 case "${MODEL}" in
 	"UniFi Dream Machine Pro"|"UniFi Dream Machine"|"UniFi Dream Router"|"UniFi Dream Machine SE")
-	echo "${MODEL} detected, installing ubios-cert in ${DATA_DIR}..."
+	echo "${MODEL} running firmware ${FIRMWARE_VER} detected, installing ubios-cert in ${DATA_DIR}..."
 	;;
 	*)
 	echo "Unsupported model: $(ubnt-device-info model)" 1>&2
