@@ -17,7 +17,7 @@ LOG="${LOGFILE} ${LOGLEVEL}"
 
 NEW_CERT='no'
 IS_UNIFI_2='false'
-if [ $(ubnt-device-info firmware || true) > 2 ]
+if [ $(ubnt-device-info firmware | sed 's#\..*$##g' || true) -gt 1 ]
  then
 	 IS_UNIFI_2='true'
 fi
