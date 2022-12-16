@@ -19,7 +19,7 @@ deploy_acmesh() {
 	tar -xvf acmesh.tar.gz --directory="${SCRIPT_DIR}/ubios-cert/acme.sh" --strip-components=1 
 }
 
-if [ ${FIRMWARE_VER} > 2 ]
+if [ $(echo ${FIRMWARE_VER} | sed 's#\..*$##g') -gt 1 ]
  then
         sed -i 's#/mnt/data#/data#g' "${SCRIPT_DIR}/ubios-cert/ubios-cert.env" "${SCRIPT_DIR}/ubios-cert/ubios-cert.sh" "${SCRIPT_DIR}/ubios-cert/on_boot.d/99-ubios-cert.sh"
         export DATA_DIR="/data"
