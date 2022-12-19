@@ -133,7 +133,12 @@ fi
 # Setup nightly cron job
 CRON_FILE='/etc/cron.d/ubios-cert'
 if [ ! -f "${CRON_FILE}" ]; then
-	echo "0 3 * * * ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
+	if [ "${IS_UNIFI_2}" = 'false' ]; then
+		# Pre-V2.x requires no user
+		echo "0 3 * * * ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
+	else # V2.x and later requires username
+		echo "0 3 * * * root ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
+	fi
 	chmod 644 ${CRON_FILE}
 	if [ -f /etc/init.d/crond ]; then
 		/etc/init.d/crond reload ${CRON_FILE}
