@@ -16,6 +16,9 @@ LOGLEVEL='--log-level 1' # default is 1, can be increased to 2
 LOG="${LOGFILE} ${LOGLEVEL}"
 
 NEW_CERT='no'
+
+# identify device firmware version: <2 is legacy (podman), 2+ is current (baremetal)
+
 IS_UNIFI_2='false'
 if [ $(ubnt-device-info firmware | sed 's#\..*$##g' || true) -gt 1 ]
  then
@@ -26,10 +29,10 @@ deploy_cert() {
 	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
 		echo 'New certificate was generated, time to deploy it'
 		# Controller certificate - copy the full chain certificates to unifi-core.crt to avoid Java cert store command error
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core.crt
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core-direct.crt
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core.key
-		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core-direct.key
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core.crt
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core-direct.crt
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core.key
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core-direct.key
 		chmod 644 ${UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-direct.crt
 		chmod 600 ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core-direct.key
 		NEW_CERT='yes'
@@ -91,7 +94,7 @@ remove_cert() {
 	echo "Removed certificates from acme.sh renewal. The certificate files can now manually be removed."
 }
 
-# Check for and if not exists create acme.sh directory so the container can write to it - owner "nobody"
+# Check for and if it not exists create acme.sh directory so the container can write to it - owner "nobody"
 if [ ! -d "${ACMESH_ROOT}" ]; then
 	mkdir "${ACMESH_ROOT}"
 	chmod 700 "${ACMESH_ROOT}"
@@ -105,15 +108,14 @@ if [ "$(stat -c '%u:%g' "${ACMESH_ROOT}")" != "65534:65534" ]; then
 fi
 
 # Support multiple certificate SANs
+# Subject Alternative Name (SAN)
 for DOMAIN in $(echo $CERT_HOSTS | tr "," "\n"); do
+	# Store the certificate under 'first entry' of CERT_HOSTS list 
 	if [ -z "$CERT_NAME" ]; then
 		CERT_NAME=$DOMAIN
 	fi
 	DOMAINS="${DOMAINS} -d ${DOMAIN}"
 done
-
-# Re-write CERT_NAME if it is a wildcard cert. Replace '*' with '_'
-ACME_CERT_NAME=$(echo "${CERT_NAME}" | sed -r 's/\*/_/g')
 
 ACME_HOME="--config-home ${ACMESH_ROOT} --cert-home ${ACMESH_ROOT} --home ${ACMESH_ROOT}"
 ACME_CMD="${ACMESH_ROOT}/acme.sh ${ACMESH_CMD_PARAMS} ${ACME_HOME}"
