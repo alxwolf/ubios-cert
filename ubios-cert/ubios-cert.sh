@@ -50,13 +50,19 @@ add_captive() {
 		# Add a prefix to run the command in podman only if the system is not native UNIFI_OS
 		if [ "${IS_UNIFI_2}" = 'false' ]; then PODMAN_PREFIX='podman exec -it unifi-os '; else PODMAN_PREFIX=''; fi
 
-		# add a single certificate without chain (this seems to be required by WiFiMan since 1.11 or so)
-		# extract just the server certificate
-		${PODMAN_PREFIX}openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core.crt -out ${UNIFIOS_CERT_PATH}/unifi-core-server-only.crt
+		# should we provide the full chain or only server cert to Guest Portal
+		if [ "${CAPTIVE_FULLCHAIN}" != 'yes' ]; then
+			# add a single certificate without chain (this is required by WiFiMan and Guest Portal to work since 1.11 or so)
+
+			# get the full chain certifcate out of the way
+			mv {UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt
+			# extract just the server certificate			
+			${PODMAN_PREFIX}openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt
+		fi
 
 		# mangle cert and key into P12 format
-		${PODMAN_PREFIX}openssl pkcs12 -export -inkey ${UNIFIOS_CERT_PATH}/unifi-core.key -in ${UNIFIOS_CERT_PATH}/unifi-core-server-only.crt -out ${UNIFIOS_CERT_PATH}/unifi-core-key-plus-server-only-cert.p12 -name unifi -password pass:aircontrolenterprise
-
+		${PODMAN_PREFIX}openssl pkcs12 -export -inkey ${UNIFIOS_CERT_PATH}/unifi-core.key -in ${UNIFIOS_CERT_PATH}/unifi-core.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.p12 -name unifi -password pass:aircontrolenterprise
+		
 		# make a backup copy of keystore
 		${PODMAN_PREFIX}cp /usr/lib/unifi/data/keystore /usr/lib/unifi/data/keystore.backup
 
@@ -64,7 +70,7 @@ add_captive() {
 		${PODMAN_PREFIX}keytool -delete -alias unifi -keystore /usr/lib/unifi/data/keystore -deststorepass aircontrolenterprise
 
 		# finally, import the p12 formatted cert+key of server only into keystore
-		${PODMAN_PREFIX}keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core-key-plus-server-only-cert.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
+		${PODMAN_PREFIX}keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
 	fi
 }
 
