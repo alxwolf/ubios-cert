@@ -29,7 +29,8 @@ This script has been explicitly tested with
 
 * [all-inkl.com](https://github.com/acmesh-official/acme.sh/wiki/dnsapi2#98-use-all-inklcom-domain-api-to-automatically-issue-cert)
 * [Cloudflare](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#1-cloudflare-option)
-* [GoDaddy](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#4-use-godaddycom-domain-api-to-automatically-issue-cert)
+* [GoDaddy](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#4-use-godaddycom-domain-api-to-automatically-issue-cert5)
+* [OVH](https://github.com/acmesh-official/acme.sh/wiki/How-to-use-OVH-domain-api)
 * [Route53](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#10-use-amazon-route53-domain-api)
 
 Send a note if you succeeded with a different provider and I will list it here.
