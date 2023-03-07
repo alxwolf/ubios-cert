@@ -58,7 +58,7 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-* The RADIUS server certificates are not updated. There is a separate branch `radius_cert_update` addressing this topic.
+* For sure some, but no known.
 
 ## UniFi OS and Network Controller Versions
 
@@ -122,6 +122,8 @@ mkdir ${DATA_DIR}/ubios-cert/certbackup
 cd ${DATA_DIR}/ubios-cert/certbackup
 cp /data/unifi-core/config/unifi-core.key ./unifi-core.key_orig
 cp /data/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
+cp /data/udapi-server/raddb/certs/server.pem ./raddb-server.pem
+cp /data/udapi-server/raddb/certs/server-key.pem ./raddb-server-key.pem
 ```
 
 Calling the script with `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh initial` will
