@@ -74,6 +74,31 @@ add_captive() {
 	fi
 }
 
+add_radius() {
+ 	echo "Checking if RADIUS server certificate needs update."
+ 	# Import the certificate for the RADIUS server
+ 	if [ "$ENABLE_RADIUS" == "yes" ] \
+ 		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; \
+ 		then
+ 		echo "New certificate was generated, time to deploy to RADIUS server"
+		# copy key
+ 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+		# copy certificate with full chain
+ 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
+ 		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+ 		echo "New RADIUS certificate deployed."
+		if [ "${IS_UNIFI_2}" = 'false' ]; then
+			echo "Please wait while restarting unifi using 'unifios restart'"
+			unifi-os restart
+		else 
+			echo "Please wait while restarting udapi-server using 'systemctl restart udapi-server'"
+			systemctl restart udapi-server
+		fi
+		echo "RADIUS server restarted."
+
+ 	fi
+}
+
 unifos_restart () {
 	if [ "${IS_UNIFI_2}" = 'false' ]; then
 		echo "Please wait while restarting unifi using 'unifios restart'"
@@ -171,7 +196,7 @@ initial)
 	${ACME_CMD} --set-default-ca --server ${DEFAULT_CA}
 	echo "Attempting initial certificate generation"
 	${ACME_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
-	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && unifos_restart
+	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && add_radius && unifos_restart
 	;;
 renew)
 	remove_old_log
@@ -180,7 +205,7 @@ renew)
 	echo "Attempting certificate renewal"
 	${ACME_CMD} --renew ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert
 	if [ "${NEW_CERT}" = "yes" ]; then
-		add_captive && unifos_restart
+		add_captive && add_radius && unifos_restart
 	fi
 	;;
 forcerenew)
@@ -188,17 +213,17 @@ forcerenew)
 	remove_old_log
 	${ACME_CMD} --renew ${DOMAINS} --force --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert
 	if [ "${NEW_CERT}" = "yes" ]; then
-		add_captive && unifos_restart
+		add_captive && add_radius && unifos_restart
 	fi
 	;;
 bootrenew)
 	echo "Attempting certificate renewal after boot"
 	remove_old_log
-	${ACME_CMD} --renew ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOGFILE} ${LOGLEVEL} && deploy_cert && add_captive && unifos_restart
+	${ACME_CMD} --renew ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOGFILE} ${LOGLEVEL} && deploy_cert && add_captive && add_radius && unifos_restart
 	;;
 deploy)
 	echo "Deploying certificates and restarting UniFi OS"
-	deploy_cert && 	add_captive && unifos_restart
+	deploy_cert && 	add_captive && add_radius && unifos_restart
 	;;
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"
