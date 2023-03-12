@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # based on the fine work of kchristensen/udm-le
@@ -78,13 +78,13 @@ add_radius() {
  	echo "Checking if RADIUS server certificate needs update."
  	# Import the certificate for the RADIUS server
  	if [ "$ENABLE_RADIUS" == "yes" ] \
- 		&& [ "$(find -L "${ACMESH_ROOT}" -type f -name "${ACME_CERT_NAME}".cer -mmin -5)" ]; \
+ 		&& [ "$(find -L ${ACMESH_ROOT} -type f -name fullchain.cer -mmin -5)" ]; \
  		then
  		echo "New certificate was generated, time to deploy to RADIUS server"
 		# copy key
- 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/${ACME_CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
+ 		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
 		# copy certificate with full chain
- 		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
+ 		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
  		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
  		echo "New RADIUS certificate deployed."
 		if [ "${IS_UNIFI_2}" = 'false' ]; then
