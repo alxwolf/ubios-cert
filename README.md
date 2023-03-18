@@ -170,3 +170,9 @@ rm -irf ./ubios-cert
 
 * Increase the log level in `ubios-cert.sh` by setting `LOGLEVEL="--log-level 2"`
 * Run `tail -f ${DATA_DIR}/ubios-cert/acme.sh/acme.sh.log`in separate terminal while running `sh ubios-cert.sh initial`, `sh ubios-cert.sh renew` or `sh ubios-cert.sh bootrenew` manually
+
+## Branches
+
+`main`- this branch, serving the most current firmware(s)
+[v1.x](https://github.com/alxwolf/ubios-cert/blob/V1.x/README.md) - applicable to V1.x firmwares only, no longer supported (by me at least due to lack of hardware)
+
