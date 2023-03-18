@@ -2,6 +2,11 @@
 
 **TL;DR** jump to [Installation](#installation)
 
+## Branches
+
+V1.x - this branch here - no longer maintained, for Firmwares 1.x
+main - for (most current?) firmwares, see README of main branch
+
 ## What it does
 
 Spare you from certificate errors when browsing to your UniFi Dream Machine (Base / Pro / SE / R)'s administrative page and guest portal.
