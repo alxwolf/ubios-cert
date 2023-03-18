@@ -1,11 +1,13 @@
+## Branches
+
+V1.x - this branch here - **no longer maintained** (at least not by me), for Firmwares 1.x
+
+[main](https://github.com/alxwolf/ubios-cert) - for (most current?) firmwares, see README of main branch
+
 # Manage SSL / TLS certificates (Let's Encrypt, ZeroSSL, Buypass) with acme.sh and DNS API for Ubiquiti UbiOS
 
 **TL;DR** jump to [Installation](#installation)
 
-## Branches
-
-V1.x - this branch here - no longer maintained, for Firmwares 1.x
-main - for (most current?) firmwares, see README of main branch
 
 ## What it does
 
