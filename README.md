@@ -174,5 +174,6 @@ rm -irf ./ubios-cert
 ## Branches
 
 `main`- this branch, serving the most current firmware(s)
+
 [v1.x](https://github.com/alxwolf/ubios-cert/blob/V1.x/README.md) - applicable to V1.x firmwares only, no longer supported (by me at least due to lack of hardware)
 
