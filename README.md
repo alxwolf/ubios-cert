@@ -145,34 +145,33 @@ Calling the script with `sh /data/ubios-cert/ubios-cert.sh initial` will
 
 ## Certificate Renewal
 
-Should be fully automated, done via a daily `cron` job. You can trigger a manual renewal by running `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh renew`, which may be useful for debugging. If `acme.sh`fails, check if you hit the [rate limits](https://letsencrypt.org/docs/rate-limits/).
+Should be fully automated, done via a daily `cron` job. You can trigger a manual renewal by running `sh /data/ubios-cert/ubios-cert.sh renew`, which may be useful for debugging. If `acme.sh` fails, check if you hit the [rate limits](https://letsencrypt.org/docs/rate-limits/).
 
-The certificate can be force-renewed by running `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh forcerenew`.
+The certificate can be force-renewed by running `sh /data/ubios-cert/ubios-cert.sh forcerenew`.
 
 ## Behaviour after firmware upgrade / reboot
 
-Here the script in `on_boot.d` will trigger execution of `sh ${DATA_DIR}/ubios-cert/ubios-cert.sh bootrenew`, with a friendly delay of five minutes after boot.
+Should not be an issue with the bare-metal v2.x+ firmwares.
 
 ## De-installation and de-registration
 
 `ssh` into your UDM. Calling the script with parameter `cleanup` will
 
 * Remove the cron file from `/etc/cron.d`
-* Remove the boot trigger from `${DATA_DIR}/on_boot.d/`
 * Remove the (most recently issued) domains from the Let's Encrypt account
 * De-activate the Let's Encrypt account
 
 Then, you can delete the script directory. As always, be careful with `rm`.
 
 ```sh
-cd ${DATA_DIR}/
+cd /data/
 ./ubios-cert/ubios-cert.sh cleanup
 rm -irf ./ubios-cert
 ```
 
 ## Selecting the default CA
 
-`acme.sh` can access different CAs, at time of writing this includes Let's Encrypt, ZeroSSL, Buypass, SSL.com and Google. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). The keywords are listed [here](https://github.com/acmesh-official/acme.sh/wiki/Server). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`. This CA will **from now on** be applied to newly issued certificates.
+`acme.sh` can access different CAs. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). The keywords are listed [here](https://github.com/acmesh-official/acme.sh/wiki/Server). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`. This CA will **from now on** be applied to newly issued certificates.
 
 ## Debugging
 
