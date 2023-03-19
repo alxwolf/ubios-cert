@@ -51,13 +51,16 @@ add_captive() {
 		echo 'New certificate was generated, time to deploy it to Guest Portal'
 
 		# should we provide the full chain or only server cert to Guest Portal
-		if [ "${CAPTIVE_FULLCHAIN}" != 'yes' ]; then
+		if [ "${CAPTIVE_FULLCHAIN}" == 'no' ]; then
 			# add a single certificate without chain (this is required by WiFiMan and Guest Portal to work since 1.11 or so)
+			echo 'Import server certificate only, enabling WiFiman'
 
 			# get the full chain certifcate out of the way
-			mv {UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt
+			mv ${UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt
 			# extract just the server certificate			
-			openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt
+			openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt+
+		else
+			echo 'Import full certificate chain, breaking WiFiman'
 		fi
 
 		# mangle cert and key into P12 format
@@ -93,7 +96,7 @@ add_radius() {
  	fi
 }
 
-unifos_restart () {
+unifios_restart () {
 	echo "Please wait while restarting unifi-core using 'systemctl restart unifi-core'"
 	# Restarting the network app with 'restart unifi' has no effect on cert. The whole unifi-os has to be reloaded.
 	systemctl restart unifi-core
@@ -171,7 +174,7 @@ initial)
 	${ACME_CMD} --set-default-ca --server ${DEFAULT_CA}
 	echo "Attempting initial certificate generation"
 	${ACME_CMD} --register-account --email ${CA_REGISTRATION_EMAIL}
-	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && add_radius && unifos_restart
+	${ACME_CMD} --issue ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert && add_captive && add_radius && unifios_restart
 	;;
 renew)
 	remove_old_log
@@ -180,7 +183,7 @@ renew)
 	echo "Attempting certificate renewal"
 	${ACME_CMD} --renew ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert
 	if [ "${NEW_CERT}" = "yes" ]; then
-		add_captive && add_radius && unifos_restart
+		add_captive && add_radius && unifios_restart
 	fi
 	;;
 forcerenew)
@@ -188,12 +191,12 @@ forcerenew)
 	remove_old_log
 	${ACME_CMD} --renew ${DOMAINS} --force --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOG} && deploy_cert
 	if [ "${NEW_CERT}" = "yes" ]; then
-		add_captive && add_radius && unifos_restart
+		add_captive && add_radius && unifios_restart
 	fi
 	;;
 deploy)
 	echo "Deploying certificates and restarting UniFi OS"
-	deploy_cert && 	add_captive && add_radius && unifos_restart
+	deploy_cert && 	add_captive && add_radius && unifios_restart
 	;;
 setdefaultca)
 	echo "Setting default CA to ${DEFAULT_CA}"
