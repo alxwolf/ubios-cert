@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # based on the fine work of kchristensen/udm-le
@@ -8,7 +8,7 @@
 set -e
 
 # Load environment variables
-. /mnt/data/ubios-cert/ubios-cert.env
+. /data/ubios-cert/ubios-cert.env
 
 # Setup variables for later for those who want to tinker around
 LOGFILE="--log ${ACMESH_ROOT}/acme.sh.log"
@@ -22,7 +22,10 @@ NEW_CERT='no'
 IS_UNIFI_2='false'
 if [ $(ubnt-device-info firmware | sed 's#\..*$##g' || true) -gt 1 ]
  then
-	 IS_UNIFI_2='true'
+	IS_UNIFI_2='true'
+ else
+	echo "Unsupported firmware: ${FIRMWARE_VER}"
+	exit 1
 fi
 
 deploy_cert() {
@@ -45,10 +48,7 @@ add_captive() {
 	echo 'Checking if Guest Hotspot Portal and WiFiman certificate needs update.'
 	# Import the certificate for the captive portal
 	if [ "${ENABLE_CAPTIVE}" = 'yes' ] && [ "$(find -L ${ACMESH_ROOT} -type f -name fullchain.cer -mmin -5)" ]; then
-		echo 'New certificate was generated, time to deploy it'
-
-		# Add a prefix to run the command in podman only if the system is not native UNIFI_OS
-		if [ "${IS_UNIFI_2}" = 'false' ]; then PODMAN_PREFIX='podman exec -it unifi-os '; else PODMAN_PREFIX=''; fi
+		echo 'New certificate was generated, time to deploy it to Guest Portal'
 
 		# should we provide the full chain or only server cert to Guest Portal
 		if [ "${CAPTIVE_FULLCHAIN}" != 'yes' ]; then
@@ -57,20 +57,20 @@ add_captive() {
 			# get the full chain certifcate out of the way
 			mv {UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt
 			# extract just the server certificate			
-			${PODMAN_PREFIX}openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt
+			openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt
 		fi
 
 		# mangle cert and key into P12 format
-		${PODMAN_PREFIX}openssl pkcs12 -export -inkey ${UNIFIOS_CERT_PATH}/unifi-core.key -in ${UNIFIOS_CERT_PATH}/unifi-core.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.p12 -name unifi -password pass:aircontrolenterprise
+		openssl pkcs12 -export -inkey ${UNIFIOS_CERT_PATH}/unifi-core.key -in ${UNIFIOS_CERT_PATH}/unifi-core.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.p12 -name unifi -password pass:aircontrolenterprise
 		
 		# make a backup copy of keystore
-		${PODMAN_PREFIX}cp /usr/lib/unifi/data/keystore /usr/lib/unifi/data/keystore.backup
+		cp /usr/lib/unifi/data/keystore /usr/lib/unifi/data/keystore.backup
 
 		# remove the existing key called 'unifi'
-		${PODMAN_PREFIX}keytool -delete -alias unifi -keystore /usr/lib/unifi/data/keystore -deststorepass aircontrolenterprise
+		keytool -delete -alias unifi -keystore /usr/lib/unifi/data/keystore -deststorepass aircontrolenterprise
 
 		# finally, import the p12 formatted cert+key of server only into keystore
-		${PODMAN_PREFIX}keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
+		keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
 	fi
 }
 
@@ -87,27 +87,16 @@ add_radius() {
  		cp -f ${ACMESH_ROOT}/${ACME_CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
  		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
  		echo "New RADIUS certificate deployed."
-		if [ "${IS_UNIFI_2}" = 'false' ]; then
-			echo "Please wait while restarting unifi using 'unifios restart'"
-			unifi-os restart
-		else 
-			echo "Please wait while restarting udapi-server using 'systemctl restart udapi-server'"
-			systemctl restart udapi-server
-		fi
+		echo "Please wait while restarting udapi-server using 'systemctl restart udapi-server'"
+		systemctl restart udapi-server
 		echo "RADIUS server restarted."
-
  	fi
 }
 
 unifos_restart () {
-	if [ "${IS_UNIFI_2}" = 'false' ]; then
-		echo "Please wait while restarting unifi using 'unifios restart'"
-		unifi-os restart
-	else 
-		echo "Please wait while restarting unifi-core using 'systemctl restart unifi-core'"
-		# Restarting the network app with 'restart unifi' has no effect on cert. The whole unifi-os has to be reloaded.
-		systemctl restart unifi-core
-	fi
+	echo "Please wait while restarting unifi-core using 'systemctl restart unifi-core'"
+	# Restarting the network app with 'restart unifi' has no effect on cert. The whole unifi-os has to be reloaded.
+	systemctl restart unifi-core
 }
 
 remove_old_log() {
@@ -151,32 +140,18 @@ done
 ACME_HOME="--config-home ${ACMESH_ROOT} --cert-home ${ACMESH_ROOT} --home ${ACMESH_ROOT}"
 ACME_CMD="${ACMESH_ROOT}/acme.sh ${ACMESH_CMD_PARAMS} ${ACME_HOME}"
 
-
-# Setup persistent on_boot.d trigger
-ON_BOOT_DIR='/mnt/data/on_boot.d'
-ON_BOOT_FILE='99-ubios-cert.sh'
-if [ -d "${ON_BOOT_DIR}" ] && [ ! -f "${ON_BOOT_DIR}/${ON_BOOT_FILE}" ]; then
-	cp "${UBIOS_CERT_ROOT}/on_boot.d/${ON_BOOT_FILE}" "${ON_BOOT_DIR}/${ON_BOOT_FILE}"
-	chmod 755 ${ON_BOOT_DIR}/${ON_BOOT_FILE}
-	echo "Restored 'on_boot.d' trigger"
-fi
-
 # Setup nightly cron job
 CRON_FILE='/etc/cron.d/ubios-cert'
 if [ ! -f "${CRON_FILE}" ]; then
-	if [ "${IS_UNIFI_2}" = 'false' ]; then
-		# Pre-V2.x requires no user
-		echo "0 3 * * * ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
-	else # V2.x and later requires username
-		echo "0 3 * * * root ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
-	fi
+	# V2.x and later requires username
+	echo "0 3 * * * root ${UBIOS_CERT_ROOT}/ubios-cert.sh renew" >${CRON_FILE}
+
 	chmod 644 ${CRON_FILE}
-	if [ -f /etc/init.d/crond ]; then
-		/etc/init.d/crond reload ${CRON_FILE}
-	elif [ -f /etc/init.d/cron ]; then
+
+	if [ -f /etc/init.d/cron ]; then
 		/etc/init.d/cron reload ${CRON_FILE}
 	else
-		echo "ERROR: Could not find cron service at /etc/init.d/crond or /etc/init.d/cron" >&2
+		echo "ERROR: Could not find cron service at /etc/init.d/cron" >&2
 		exit 1
 	fi
 	echo "Restored cron file"
@@ -216,11 +191,6 @@ forcerenew)
 		add_captive && add_radius && unifos_restart
 	fi
 	;;
-bootrenew)
-	echo "Attempting certificate renewal after boot"
-	remove_old_log
-	${ACME_CMD} --renew ${DOMAINS} --dns ${DNS_API_PROVIDER} --keylength 2048 ${LOGFILE} ${LOGLEVEL} && deploy_cert && add_captive && add_radius && unifos_restart
-	;;
 deploy)
 	echo "Deploying certificates and restarting UniFi OS"
 	deploy_cert && 	add_captive && add_radius && unifos_restart
@@ -234,11 +204,6 @@ cleanup)
 	if [ -f "${CRON_FILE}" ]; then
 		rm "${CRON_FILE}"
 		echo "Removed cron file"
-	fi
-
-	if [ -d "${ON_BOOT_DIR}" ] && [ -f "${ON_BOOT_DIR}/${ON_BOOT_FILE}" ]; then
-		rm "${ON_BOOT_DIR}/${ON_BOOT_FILE}"
-		echo "Removed on_boot.d trigger"
 	fi
 
 	if [ -f "${ACMESH_ROOT}/account.conf" ]; then
