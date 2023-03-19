@@ -2,8 +2,6 @@
 set -e
 SCRIPT_DIR=$(dirname ${0})
 
-# Set default data path
-export DATA_DIR="/mnt/data"
 # Get the firmware version
 export FIRMWARE_VER=$(ubnt-device-info firmware || true)
 # Get the Harware Model
@@ -20,9 +18,11 @@ deploy_acmesh() {
 }
 
 if [ $(echo ${FIRMWARE_VER} | sed 's#\..*$##g') -gt 1 ]
- then
-        sed -i 's#/mnt/data#/data#g' "${SCRIPT_DIR}/ubios-cert/ubios-cert.env" "${SCRIPT_DIR}/ubios-cert/ubios-cert.sh" "${SCRIPT_DIR}/ubios-cert/on_boot.d/99-ubios-cert.sh"
+	then
         export DATA_DIR="/data"
+	else
+		echo "Unsupported firmware: ${FIRMWARE_VER}"
+		exit 1
 fi
 
 case "${MODEL}" in
@@ -37,7 +37,7 @@ esac
 echo
 
 deploy_acmesh
-chmod +x ${SCRIPT_DIR}/ubios-cert/ubios-cert.sh ${SCRIPT_DIR}/ubios-cert/on_boot.d/99-ubios-cert.sh
+chmod +x ${SCRIPT_DIR}/ubios-cert/ubios-cert.sh
 mv "${SCRIPT_DIR}/ubios-cert/" "${DATA_DIR}/ubios-cert/"
 rm -rf ${SCRIPT_DIR}/../ubios-cert-main ~/ubios-cert.zip
 echo "Deployed with success in ${DATA_DIR}/ubios-cert"
