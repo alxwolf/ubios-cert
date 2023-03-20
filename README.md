@@ -1,6 +1,6 @@
-# Valid and free TLS / SSL certificates for UniFi Consoles
+# Valid and free TLS / SSL certificates for UniFi Consoles V3.x and V2.x
 
-*Last update: March 19, 2023* 
+*Last update: March 20, 2023* 
 
 ## What it does
 
@@ -29,7 +29,7 @@ In most private installations, the UniFi console will live behind a router / fir
 
 ## What you need
 
-* A UniFi Console with firmware > 2.0,
+* A UniFi Console with firmware V2.x or V3.x,
 * a registered domain where you have API access for running the DNS-01 API challenge
 
 ## Installation
@@ -151,7 +151,7 @@ The certificate can be force-renewed by running `sh /data/ubios-cert/ubios-cert.
 
 ## Behaviour after firmware upgrade / reboot
 
-Should not be an issue with the bare-metal v2.x+ firmwares.
+Survived reboots and firmware updates, including release change from V2 to V3.
 
 ## De-installation and de-registration
 
@@ -192,4 +192,4 @@ A huge "Thank You" goes to
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 2.5.17 and Network Version 7.3.83
+Confirmed to work on UniFi OS Version 2.5.17, 3.0.19 and Network Version 7.3.83, 7.4.146
