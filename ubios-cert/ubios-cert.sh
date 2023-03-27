@@ -58,7 +58,7 @@ add_captive() {
 			# get the full chain certifcate out of the way
 			mv ${UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt
 			# extract just the server certificate			
-			openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt+
+			openssl x509 -in ${UNIFIOS_CERT_PATH}/unifi-core-fullchain.crt -out ${UNIFIOS_CERT_PATH}/unifi-core.crt
 		else
 			echo 'Import full certificate chain, breaking WiFiman'
 		fi
