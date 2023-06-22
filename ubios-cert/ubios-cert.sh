@@ -33,11 +33,7 @@ deploy_cert() {
 		echo 'New certificate was generated, time to deploy it'
 		# Controller certificate - copy the full chain certificates to unifi-core.crt to avoid Java cert store command error
 		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core.crt
-		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core-direct.crt
 		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core.key
-		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core-direct.key
-		chmod 644 ${UNIFIOS_CERT_PATH}/unifi-core.crt ${UNIFIOS_CERT_PATH}/unifi-core-direct.crt
-		chmod 644 ${UNIFIOS_CERT_PATH}/unifi-core.key ${UNIFIOS_CERT_PATH}/unifi-core-direct.key
 		NEW_CERT='yes'
 	else
 		echo 'No new certificate was found, exiting without restart'
