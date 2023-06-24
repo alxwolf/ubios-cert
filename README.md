@@ -1,6 +1,6 @@
 # Valid and free TLS / SSL certificates for UniFi Consoles V3.x and V2.x
 
-*Last update: March 20, 2023* 
+*Last update: June 24, 2023* 
 
 ## What it does
 
@@ -192,4 +192,4 @@ A huge "Thank You" goes to
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 2.5.17, 3.0.19 and Network Version 7.3.83, 7.4.146
+Confirmed to work on UniFi OS Version 2.5.17, 3.0.19, 3.1.12 and Network Version 7.3.83, 7.4.146
