@@ -1,6 +1,6 @@
 # Valid and free TLS / SSL certificates for UniFi Consoles V3.x and V2.x
 
-*Last update: June 24, 2023* 
+Last update: December 11, 2023
 
 ## What it does
 
@@ -8,7 +8,7 @@ Spare you and your users from certificate errors when browsing to your UniFi Con
 
 **TL;DR** jump to [Installation](#installation)
 
-It will install Neilpang's [`acme.sh`](https://github.com/acmesh-official/acme.sh), is extremely light as it runs on bare metal and survives (until further notice...) reboots and firmware upgrades (at least for minor revisions). No need to fiddle around with `podman` installations.
+It will install Neilpang's [`acme.sh`](https://github.com/acmesh-official/acme.sh), is extremely light as it runs on bare metal and survives (until further notice...) reboots and firmware upgrades (at least for minor revisions). No need fiddling around with `podman` installations.
 
 With that, it will
 
@@ -19,6 +19,7 @@ With that, it will
 ## Discontinued support for firmwares < v2.x
 
 This branch serves the most current firmware(s). If you're still running a V1.x (why would you...), please have a look at branch [v1.x](https://github.com/alxwolf/ubios-cert/blob/V1.x/README.md) - which is no longer supported (at least not by me due to lack of hardware).
+
 ## Currently supported DNS API providers
 
 Over 150, check [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi) Wiki for details.
@@ -69,7 +70,7 @@ In most private installations, the UniFi console will live behind a router / fir
 
 ### Make your adjustments
 
-Adjust file [`ubios-cert.env`](./ubios-cert.env) to your needs. 
+Adjust file [`ubios-cert.env`](./ubios-cert.env) to your needs.
 
 First, define your certificate names and CA by adjusting
 
@@ -88,7 +89,7 @@ CA_REGISTRATION_EMAIL='user@domain.com'
 DEFAULT_CA="letsencrypt"
 ```
 
-Second, 
+Second,
 
 ```sh
 #################################################
@@ -109,7 +110,7 @@ ENABLE_RADIUS='no'
 
 Third, select your DNS API provider by adjusting the variable `DNS_API_PROVIDER="dns_xxx"`.
 
-`dns_xxx` must be replaced with the `--dns` parameter from your provider's [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi) Wiki entry. 
+`dns_xxx` must be replaced with the `--dns` parameter from your provider's [acme.sh DNS API](https://github.com/acmesh-official/acme.sh/wiki/dnsapi) Wiki entry.
 
 So for CloudFlare this would say
 
@@ -130,8 +131,8 @@ mkdir /data/ubios-cert/certbackup
 cd /data/ubios-cert/certbackup
 cp /data/unifi-core/config/unifi-core.key ./unifi-core.key_orig
 cp /data/unifi-core/config/unifi-core.crt ./unifi-core.crt_orig
-cp /data/udapi-server/raddb/certs/server.pem ./raddb-server.pem
-cp /data/udapi-server/raddb/certs/server-key.pem ./raddb-server-key.pem
+cp /data/udapi-config/raddb/certs/server.pem ./raddb-server.pem
+cp /data/udapi-config/raddb/certs/server-key.pem ./raddb-server-key.pem
 ```
 
 Calling the script with `sh /data/ubios-cert/ubios-cert.sh initial` will
@@ -192,4 +193,4 @@ A huge "Thank You" goes to
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 2.5.17, 3.0.19, 3.1.12 and Network Version 7.3.83, 7.4.146
+Confirmed to work on UniFi OS Version 2.5.17, 3.0.19, 3.1.12, 3.2.7 and Network Version 7.3.83, 7.4.146, 8.0.24
