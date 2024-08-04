@@ -72,7 +72,7 @@ In most private installations, the UniFi console will live behind a router / fir
 
 ### Make your adjustments
 
-Adjust file [`ubios-cert.env`](./ubios-cert.env) to your needs.
+Adjust file [`ubios-cert.env`](./ubios-cert/ubios-cert.env) to your needs.
 
 First, define your certificate names and CA by adjusting
 
