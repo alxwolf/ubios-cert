@@ -55,6 +55,11 @@ deploy_cert() {
 	echo -e "${GRAY}INFO   ${RESET} New certificate was generated, time to deploy it"
 	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
 		copy_and_link
+
+		# funny enough, this still seems to be required by UniFi Protect to be able to boot up
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UNIFIOS_CERT_PATH}/unifi-core.crt
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UNIFIOS_CERT_PATH}/unifi-core.key
+
 		NEW_CERT='yes'
 		echo -e "${GREEN}# SUCCESS${RESET} Certifcate deployed to UniFi OS, service not yet restarted."
 	else
