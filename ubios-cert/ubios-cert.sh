@@ -67,13 +67,6 @@ copy_and_link() {
 		mkdir -p ${UBIOS_CERT_ROOT}/certificates/;
 		echo -e "${BLUE}# INFO    ${RESET} Created directory for certificates"
 	fi
-	# copy cert and key to a more convenient place so we can use fixed path names
-	if [[ -f "${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer" ]]; then
-		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UBIOS_CERT_ROOT}/certificates/unifi-core.crt
-	fi
-	if [[ -f "${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key" ]]; then
-		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UBIOS_CERT_ROOT}/certificates/unifi-core.crt
-	fi
 	# beginning with 3.2.7, no need to copy the cert and key, but point in the right direction via a YAML file
 	if [[ ! -f "${UNIFI_CORE_SSL_CONFIG}" ]]; then
 		tee "${UNIFI_CORE_SSL_CONFIG}" &>/dev/null << SSL
@@ -82,6 +75,14 @@ ssl:
   crt: '${UBIOS_CERT_ROOT}/certificates/unifi-core.crt'
   key: '${UBIOS_CERT_ROOT}/certificates/unifi-core.key'
 SSL
+	fi
+
+	# copy cert and key to a more convenient place so we can use fixed path names
+	if [[ -f "${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer" ]]; then
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UBIOS_CERT_ROOT}/certificates/unifi-core.crt
+	fi
+	if [[ -f "${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key" ]]; then
+		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UBIOS_CERT_ROOT}/certificates/unifi-core.crt
 	fi
 }
 
