@@ -24,7 +24,7 @@ With that, it will
 
 ## Discontinued support for firmwares < v4.x
 
-This branch serves the most current firmware(s). 
+This branch serves the most current firmware(s).
 
 If you're still running a V1.x (why would you...), please have a look at branch [v1.x](https://github.com/alxwolf/ubios-cert/blob/V1.x/README.md) - which is no longer supported (at least not by me due to lack of hardware).
 

@@ -121,6 +121,18 @@ add_captive() {
 
 		# finally, import the p12 formatted cert+key of server only into keystore
 		keytool -importkeystore -deststorepass aircontrolenterprise -destkeypass aircontrolenterprise -destkeystore /usr/lib/unifi/data/keystore -srckeystore ${UNIFIOS_CERT_PATH}/unifi-core.p12 -srcstoretype PKCS12 -srcstorepass aircontrolenterprise -alias unifi -noprompt
+
+		# new since V3.2.7 - some flags must be set if ECDSA certificate 
+		if openssl pkcs12 -in "${UNIFIOS_CERT_PATH}/unifi-core.p12" -password pass:aircontrolenterprise -nokeys ${openssl_legacy_flag} | openssl x509 -text -noout | grep -i signature | grep -iq ecdsa &> /dev/null; then
+		echo "unifi.https.ciphers=ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES128-GCM-SHA256" &>> /usr/lib/unifi/data/system.properties
+		echo "unifi.https.sslEnabledProtocols=TLSv1.3,TLSv1.2" &>> /usr/lib/unifi/data/system.properties
+		fi
+
+		if [[ -f "${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer" ]]; then
+			cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UBIOS_CERT_ROOT}/certificates/unifi-core.crt
+		fi
+
+
 	fi
 }
 
@@ -173,6 +185,11 @@ remove_cert() {
 # "main" starts here
 #
 ######################
+
+# Check openSSL version, if version 3.x.x, use -legacy for pkcs12 - with UDM V4.x, we're still on OpenSSL v1.1
+openssl_version="$(openssl version | awk '{print $2}' | sed -e 's/[a-zA-Z]//g')"
+first_digit_openssl="$(echo "${openssl_version}" | cut -d'.' -f1)"
+if [[ "${first_digit_openssl}" -ge "3" ]]; then openssl_legacy_flag="-legacy"; fi
 
 # Check for and if it not exists create acme.sh directory so the container can write to it - owner "nobody"
 if [ ! -d "${ACMESH_ROOT}" ]; then
