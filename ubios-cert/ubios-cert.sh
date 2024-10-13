@@ -131,7 +131,7 @@ add_radius() {
 }
 
 webfrontend_restart () {
-	echo -e "${GRAY}#${RESET} Restarting web frontend (unifi-core)."
+	echo -e "${BLUE}#${RESET} Restarting web frontend (unifi-core)."
 	if systemctl restart unifi-core; then 
 		echo -e "${GREEN}#${RESET} Restarted UniFi OS on ${unifi_core_device}."
 	else 
@@ -141,7 +141,7 @@ webfrontend_restart () {
 }
 
 networkapp_restart() {
-	echo -e "${GRAY}#${RESET} Restarting UniFi Network Application."
+	echo -e "${BLUE}#${RESET} Restarting UniFi Network Application."
 	if systemctl restart unifi; then
 		echo -e "${GREEN}#${RESET} Restarted UniFi Network Application."
 	else
@@ -171,6 +171,13 @@ remove_cert() {
 	remove_old_log
 	${ACME_CMD} --remove ${DOMAINS}
 	echo -e "${GREEN}#${RESET} Removed certificates from acme.sh renewal. The certificate files can now manually be removed."
+}
+
+deploy() {
+	echo -e "${BLUE}#${RESET} Deploying certificates and restarting UniFi OS"
+	deploy_webfrontend
+	deploy_hotspot_portal
+	add_radius
 }
 
 ######################
@@ -259,10 +266,7 @@ force-renew)
 	deploy
 	;;
 deploy)
-	echo "Deploying certificates and restarting UniFi OS"
-	deploy_webfrontend
-	deploy_hotspot_portal
-	add_radius
+	deploy
 	;;
 deploy-webfrontend)
 	deploy_webfrontend
@@ -275,7 +279,7 @@ deploy-radius)
 	;;
 set-default-ca)
 	remove_old_log
-	echo -e "${BLUE}#${RESET}Setting default CA to ${DEFAULT_CA}"
+	echo -e "${BLUE}#${RESET} Setting default CA to ${DEFAULT_CA}"
 	${ACME_CMD} --set-default-ca --server ${DEFAULT_CA}
 	;;
 cleanup)
