@@ -1,8 +1,12 @@
-# Valid and free TLS / SSL certificates for UniFi Consoles V3.x and V2.x
+# Valid and free TLS / SSL certificates for UniFi Consoles V4.x and V3.2.x
 
-Last update: December 13, 2023. 
+Last update: October 12, 2024.
 
-*CAVEAT* there have been reports that v3.7.2 (early access) keeps overwriting custom certificates, breaking some applications. Currently under investigation.
+*Public Service Announcement:* In best tradition, UI has established some new, of course undocumented, black magic around valid SSL certificates. This release now tries to cope with this new twist. With this current release, I believe the web frontend could be fixed, i.e. certs not overwritten each time at zulu zero dark. So, right now, RADIUS will still not work and Network Application (WifiMan and Guest Portal) has not been tested.
+
+I suggest you give Glenn R.'s [monster scripts](https://glennr.nl/s/unifi-lets-encrypt) a try. He's on the [UI community forums](https://community.ui.com/questions/UniFi-Installation-Scripts-or-UniFi-Easy-Update-Script-or-UniFi-Lets-Encrypt-or-UniFi-Easy-Encrypt-/ccbc7530-dd61-40a7-82ec-22b17f027776) and obviously knows extremely well, what needs to be done, but has not been willing to address the request for certificates issued with DNS-Challenge. Coincidently, he seems to work for UI and there is a UI team member called *UI-Glenn*.
+
+If you're able to convince him or UI to provide proper, out of the box support for securing communication with UI devices beyond having a self-signed "unifi.local" certificate - I will archive this project the next minute.
 
 ## What it does
 
@@ -18,9 +22,13 @@ With that, it will
 * use the DNS-01 challenge, so you don't have be present on the Internet with open ports 80 and 443,
 * renew your certificate automatically every 60 days.
 
-## Discontinued support for firmwares < v2.x
+## Discontinued support for firmwares < v4.x
 
-This branch serves the most current firmware(s). If you're still running a V1.x (why would you...), please have a look at branch [v1.x](https://github.com/alxwolf/ubios-cert/blob/V1.x/README.md) - which is no longer supported (at least not by me due to lack of hardware).
+This branch serves the most current firmware(s). 
+
+If you're still running a V1.x (why would you...), please have a look at branch [v1.x](https://github.com/alxwolf/ubios-cert/blob/V1.x/README.md) - which is no longer supported (at least not by me due to lack of hardware).
+
+If you're on V2.x to anything before V3.2.7, check branch [V2-to-V3.1](https://github.com/alxwolf/ubios-cert/tree/V2-to-V3.1).
 
 ## Currently supported DNS API providers
 
@@ -32,16 +40,16 @@ In most private installations, the UniFi console will live behind a router / fir
 
 ## What you need
 
-* A UniFi Console with firmware V2.x or V3.x,
-* a registered domain where you have API access for running the DNS-01 API challenge
+* A UniFi Console with firmware V4.x,
+* a registered domain where you have API access for running the DNS-01 API challenge,
+* the awareness you might break something.
 
 ## Installation
 
 ### Download the package
 
 * `ssh` into your UDM
-* Download the archive to your home directory
-* Unzip it
+* Download the archive to your home directory and unzip it
 
   ```sh
   cd
@@ -188,11 +196,12 @@ A huge "Thank You" goes to
 * [Neilpang's acme.sh](https://github.com/acmesh-official/acme.sh): the probably most convenient and most supported interface for Let's Encrypt, ZeoSSL, Buypass and SSL.com.
 * [llaforest](https://github.com/llaforest): for implementing the native / bare metal version of `acme.sh`
 * [kchristensen's udm-le for UDM](https://github.com/kchristensen/udm-le): his work provides the base for both structure of implementation and content.
+* [Glenn R.'s Easy Encrypt script](https://glennr.nl/s/unifi-lets-encrypt)
 
 ## Known bugs and unknowns
 
-* For sure some, but no known.
+* For sure some. And a lack of tests, checks and cleanup.
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 2.5.17, 3.0.19, 3.1.12, 3.2.6 and Network Version 7.3.83, 7.4.146, 8.0.24
+Confirmed to work on UniFi OS Version 4.0.x ~~and Network Version 7.3.83, 7.4.146, 8.0.24~~
