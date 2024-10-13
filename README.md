@@ -1,20 +1,20 @@
 # Valid and free TLS / SSL certificates for UniFi Consoles V4.x and V3.2.x
 
-Last update: October 12, 2024.
+Last update: October 13, 2024.
 
-*Public Service Announcement:* In best tradition, UI has established some new, of course undocumented, black magic around valid SSL certificates. This release now tries to cope with this new twist. With this current release, I believe the web frontend could be fixed, i.e. certs not overwritten each time at zulu zero dark. So, right now, RADIUS will still not work and Network Application (WifiMan and Guest Portal) has not been tested.
+*Public Service Announcement:* In its best tradition, UI has established some new, of course undocumented, black magic around valid SSL certificates. This project here tries to cope with this new twist. Web frontend and Hotspot are covered now, and WiFiMan will be toasted as soon as you use custom SSL certificates. This has been officially acknowledged by UI. Right now, RADIUS will still not work.
 
-I suggest you give Glenn R.'s [monster scripts](https://glennr.nl/s/unifi-lets-encrypt) a try. He's on the [UI community forums](https://community.ui.com/questions/UniFi-Installation-Scripts-or-UniFi-Easy-Update-Script-or-UniFi-Lets-Encrypt-or-UniFi-Easy-Encrypt-/ccbc7530-dd61-40a7-82ec-22b17f027776) and obviously knows extremely well, what needs to be done, but has not been willing to address the request for certificates issued with DNS-Challenge. Coincidently, he seems to work for UI and there is a UI team member called *UI-Glenn*.
+I suggest you give Glenn R.'s [monster scripts](https://glennr.nl/s/unifi-lets-encrypt) a try - if you can. He's on the [UI community forums](https://community.ui.com/questions/UniFi-Installation-Scripts-or-UniFi-Easy-Update-Script-or-UniFi-Lets-Encrypt-or-UniFi-Easy-Encrypt-/ccbc7530-dd61-40a7-82ec-22b17f027776) and obviously knows extremely well what needs to be done, but is not willing to address the request for certificates issued with DNS-Challenge. Coincidently, he seems to work for UI and there is a UI team member called *UI-Glenn*.
 
-If you're able to convince him or UI to provide proper, out of the box support for securing communication with UI devices beyond having a self-signed "unifi.local" certificate - I will archive this project the next minute.
+If you're able to convince him or UI to provide proper, out of the box support for securing communication with UI devices beyond having a self-signed "unifi.local" certificate - I will archive this project the next minute. In the meantime...
 
 ## What it does
 
-Spare you and your users from certificate errors when browsing to your UniFi Console's (Dream Machine Base / Pro / SE / R) administrative page, Guest Portal or RADIUS server.
+Spare you and your users from certificate errors when browsing to your UniFi Console's (Dream Machine Base / Pro / SE / R) administrative web frontend, Hotspot Portal ~~and RADIUS server~~.
 
 **TL;DR** jump to [Installation](#installation)
 
-It will install Neilpang's [`acme.sh`](https://github.com/acmesh-official/acme.sh), is extremely light as it runs on bare metal and survives (until further notice...) reboots and firmware upgrades (at least for minor revisions). No need fiddling around with `podman` installations.
+It will install Neilpang's [`acme.sh`](https://github.com/acmesh-official/acme.sh), is extremely light as it runs on bare metal and survives (until further notice...) reboots and firmware upgrades (at least for minor revisions).
 
 With that, it will
 
@@ -106,16 +106,15 @@ Second,
 # Select services to provide the certificate to #
 #################################################
 
-# Enable updating Captive Portal (for Guest Hotspot and WiFiman) certificate as well as device certificate
-ENABLE_CAPTIVE='no'
-
-# you want to spare users from "intermediate certificate missing" errors?
-# this will break WiFiman iOS app
-# uncomment next line, set to 'yes' to provide the full chain to Captive Portal
-CAPTIVE_FULLCHAIN='yes'
+# Enable updating Hotspot Portal certificate 
+# this will break WiFiMan 100% as of v3.2.7
+# provide options 'yes' or 'no' in lowercase
+ENABLE_HOTSPOT='yes'
 
 # Enable updating Radius support
-ENABLE_RADIUS='no'
+# provide options 'yes' or 'no' in lowercase
+ENABLE_RADIUS='yes'
+
 ```
 
 Third, select your DNS API provider by adjusting the variable `DNS_API_PROVIDER="dns_xxx"`.
@@ -158,15 +157,15 @@ Calling the script with `sh /data/ubios-cert/ubios-cert.sh initial` will
 
 Should be fully automated, done via a daily `cron` job. You can trigger a manual renewal by running `sh /data/ubios-cert/ubios-cert.sh renew`, which may be useful for debugging. If `acme.sh` fails, check if you hit the [rate limits](https://letsencrypt.org/docs/rate-limits/).
 
-The certificate can be force-renewed by running `sh /data/ubios-cert/ubios-cert.sh forcerenew`.
+The certificate can be force-renewed by running `sh /data/ubios-cert/ubios-cert.sh force-renew`.
 
 ## Behaviour after firmware upgrade / reboot
 
-Survived reboots and firmware updates, including release change from V2 to V3.
+Survived reboots and firmware updates, including release change from V3 to V4.
 
 ## De-installation and de-registration
 
-`ssh` into your UDM. Calling the script with parameter `cleanup` will
+`ssh` into your UDM. Calling the script with `sh /data/ubios-cert/ubios-cert.sh cleanup` will
 
 * Remove the cron file from `/etc/cron.d`
 * Remove the (most recently issued) domains from the Let's Encrypt account
@@ -182,12 +181,12 @@ rm -irf ./ubios-cert
 
 ## Selecting the default CA
 
-`acme.sh` can access different CAs. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). The keywords are listed [here](https://github.com/acmesh-official/acme.sh/wiki/Server). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh setdefaultca`. This CA will **from now on** be applied to newly issued certificates.
+`acme.sh` can access different CAs. [You can select which CA you want it to use](https://github.com/alxwolf/ubios-cert/wiki/acme.sh:-choosing-the-default-CA). The keywords are listed [here](https://github.com/acmesh-official/acme.sh/wiki/Server). Adjust the value in `ubios-cert.env` first and then call the script with `ubios-cert.sh set-default-ca`. This CA will **from now on** be applied to newly issued certificates.
 
 ## Debugging
 
 * Increase the log level in `ubios-cert.sh` by setting `LOGLEVEL="--log-level 2"`
-* Run `tail -f ${DATA_DIR}/ubios-cert/acme.sh/acme.sh.log`in separate terminal while running `sh ubios-cert.sh initial`, `sh ubios-cert.sh renew` or `sh ubios-cert.sh bootrenew` manually
+* Run `tail -f ${DATA_DIR}/ubios-cert/acme.sh/acme.sh.log`in separate terminal while running `sh ubios-cert.sh initial`, `sh ubios-cert.sh renew` or `sh ubios-cert.sh force-renew` manually
 
 ## Inspired by - Sources and Credits
 
