@@ -128,10 +128,9 @@ add_captive() {
 		echo "unifi.https.sslEnabledProtocols=TLSv1.3,TLSv1.2" &>> /usr/lib/unifi/data/system.properties
 		fi
 
-		if [[ -f "${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer" ]]; then
-			cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UBIOS_CERT_ROOT}/certificates/unifi-core.crt
+		if [[ -f "${UNIFIOS_CERT_PATH}/unifi-core.p12" ]]; then
+			cp -f ${UNIFIOS_CERT_PATH}/unifi-core.p12 ${UBIOS_CERT_ROOT}/certificates/unifi-core.p12
 		fi
-
 
 	fi
 }
