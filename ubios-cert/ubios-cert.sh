@@ -111,23 +111,20 @@ deploy_hotspot_portal() {
 	fi
 }
 
-add_radius() {
- 	echo "Checking if RADIUS server certificate needs update."
+deploy_radius() {
+ 	echo -e "${BLUE}#${RESET} Checking if RADIUS server certificate needs update."
  	# Import the certificate for the RADIUS server
- 	if [ "$ENABLE_RADIUS" == "yes" ] \
- 		&& [ "$(find -L ${ACMESH_ROOT} -type f -name fullchain.cer -mmin -5)" ]; \
- 		then
- 		echo "New certificate was generated, time to deploy to RADIUS server"
+ 	if [ "$ENABLE_RADIUS" == "yes" ] && [ "$(find -L ${ACMESH_ROOT} -type f -name fullchain.cer -mmin -5)" ]; then
+ 		echo -e "${BLUE}#${RESET} New certificate was generated, time to deploy to RADIUS server"
 		# copy key
  		cp -f ${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
 		# copy certificate with full chain
  		cp -f ${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer ${UBIOS_RADIUS_CERT_PATH}/server.pem
  		chmod 600 ${UBIOS_RADIUS_CERT_PATH}/server.pem ${UBIOS_RADIUS_CERT_PATH}/server-key.pem
- 		echo "New RADIUS certificate deployed."
-		echo "Please wait while restarting udapi-server using 'systemctl restart udapi-server'"
-		systemctl restart udapi-server
-		echo "RADIUS server restarted."
+ 		echo -e "${BLUE}#${RESET} New RADIUS certificate and key deployed."
+ 		echo -e "${RED}#${RESET} Most probably, it won't work."
  	fi
+	radius_restart
 }
 
 webfrontend_restart () {
@@ -150,7 +147,7 @@ networkapp_restart() {
 }
 
 radius_restart() {
-	echo -e "${GRAY}#${RESET} Restarting UniFi RADIUS server."
+	echo -e "${BLUE}#${RESET} Restarting UniFi RADIUS server."
 	if systemctl restart udapi-server; then
 		echo -e "${GREEN}#${RESET} Restarted UniFi RADIUS server."
 	else
@@ -177,7 +174,7 @@ deploy() {
 	echo -e "${BLUE}#${RESET} Deploying certificates and restarting UniFi OS"
 	deploy_webfrontend
 	deploy_hotspot_portal
-	add_radius
+	deploy_radius
 }
 
 ######################
@@ -275,7 +272,7 @@ deploy-hotspot-portal)
 	deploy_hotspot_portal
 	;;
 deploy-radius)
-	add_radius
+	deploy_radius
 	;;
 set-default-ca)
 	remove_old_log

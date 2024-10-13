@@ -199,8 +199,8 @@ A huge "Thank You" goes to
 
 ## Known bugs and unknowns
 
-* For sure some. And a lack of tests, checks and cleanup.
+* For sure some. And a lack of tests, checks and cleanup. RADIUS certificates are still broken.
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 4.0.x ~~and Network Version 7.3.83, 7.4.146, 8.0.24~~
+Confirmed to work on UniFi OS Version 4.0.x and Network Version 8.5.6
