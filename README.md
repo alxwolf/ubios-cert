@@ -4,7 +4,7 @@ Last update: December 24, 2024.
 
 *Public Service Announcement:* In its best tradition, UI has established some new, of course undocumented, black magic around valid SSL certificates. This project here tries to cope with this new twist. Web frontend and Hotspot are covered now, and WiFiMan will be toasted as soon as you use custom SSL certificates. This has been officially acknowledged by UI. Right now, RADIUS ~~will still not work~~ can be fixed manually as described [here](https://github.com/alxwolf/ubios-cert/wiki/RADIUS-certificates).
 
-With 4.1.x, UI has *again* changed the way the handle certificates, but still not implemented in a proper way. So right now, 4.1 (in Early Access as of writing) is not supported.
+With 4.1.x, UI has *again* changed the way they handle certificates, but still not implemented in a proper way. So right now, 4.1 (in Early Access as of writing) is not supported.
 
 I suggest you give Glenn R.'s [monster scripts](https://glennr.nl/s/unifi-lets-encrypt) a try - if you can. He's on the [UI community forums](https://community.ui.com/questions/UniFi-Installation-Scripts-or-UniFi-Easy-Update-Script-or-UniFi-Lets-Encrypt-or-UniFi-Easy-Encrypt-/ccbc7530-dd61-40a7-82ec-22b17f027776) and obviously knows extremely well what needs to be done, but is not willing to address the request for certificates issued with DNS-Challenge. Coincidently, he seems to work for UI and there is a UI team member called *UI-Glenn*.
 
