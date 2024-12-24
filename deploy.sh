@@ -25,6 +25,12 @@ if [ $(echo ${FIRMWARE_VER} | sed 's#\..*$##g') -gt 1 ]
 		exit 1
 fi
 
+if [ $(echo ${FIRMWARE_VER} | sed 's#\..1$##g') = "4.1" ]
+	then
+		echo "Unsupported firmware: ${FIRMWARE_VER}"
+		exit 1
+fi
+
 case "${MODEL}" in
 	"UniFi Dream Machine Pro"|"UniFi Dream Machine"|"UniFi Dream Router"|"UniFi Dream Machine SE")
 	echo "${MODEL} running firmware ${FIRMWARE_VER} detected, installing ubios-cert in ${DATA_DIR}..."
