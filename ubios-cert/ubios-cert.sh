@@ -40,7 +40,15 @@ LOG="${LOGFILE} ${LOGLEVEL}"
 
 IS_UNIFI_4='false'
 FIRMWARE_VER=$(ubnt-device-info firmware)
-if [ $(ubnt-device-info firmware | sed 's#\..*$##g' || true) -gt 1 ]
+
+# ugly bailout if FW >4.0
+if [ $(echo ${FIRMWARE_VER} | sed 's#\..1$##g') = "4.1" ]
+	then
+		echo "Unsupported firmware: ${FIRMWARE_VER}"
+		exit 1
+fi
+
+if [ $(ubnt-device-info firmware | sed 's#\..*$##g' || true) -gt 1 ] 
  then
 	IS_UNIFI_4='true'
 	echo -e "${BLUE}#${RESET} Supported firmware: ${FIRMWARE_VER} on ${unifi_core_device}. Moving on."
@@ -58,8 +66,8 @@ deploy_webfrontend() {
 			tee "${UNIFI_CORE_SSL_CONFIG}" &>/dev/null << SSL
 # File created by ubios-cert (certificates for Unifi Dream Machines).
 ssl:
-crt: '${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer'
-key: '${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key'
+  crt: '${ACMESH_ROOT}/${CERT_NAME}/fullchain.cer'
+  key: '${ACMESH_ROOT}/${CERT_NAME}/${CERT_NAME}.key'
 SSL
 		fi
 		# funny enough, this still seems to be required by UniFi Protect to be able to boot up
