@@ -63,6 +63,7 @@ deploy_webfrontend() {
 	if [ "$(find -L "${ACMESH_ROOT}" -type f -name fullchain.cer -mmin -5)" ]; then
 		# beginning with 3.2.7, no need to copy the cert and key, but point in the right direction via a YAML file
 		if [[ ! -f "${UNIFI_CORE_SSL_CONFIG}" ]]; then
+  			mkdir -p "$(dirname "${UNIFI_CORE_SSL_CONFIG}")"
 			tee "${UNIFI_CORE_SSL_CONFIG}" &>/dev/null << SSL
 # File created by ubios-cert (certificates for Unifi Dream Machines).
 ssl:
