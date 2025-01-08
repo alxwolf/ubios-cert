@@ -32,7 +32,7 @@ if [ $(echo ${FIRMWARE_VER} | sed 's#\..1$##g') = "4.1" ]
 fi
 
 case "${MODEL}" in
-	"UniFi Dream Machine Pro"|"UniFi Dream Machine"|"UniFi Dream Router"|"UniFi Dream Machine SE"|"UniFi Express")
+	"UniFi Dream Machine Pro"|"UniFi Dream Machine"|"UniFi Dream Router"|"UniFi Dream Machine SE"|"UniFi Express"|"UniFi Dream Wall")
 	echo "${MODEL} running firmware ${FIRMWARE_VER} detected, installing ubios-cert in ${DATA_DIR}..."
 	;;
 	*)
