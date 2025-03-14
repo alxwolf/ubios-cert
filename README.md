@@ -1,10 +1,16 @@
-# Valid and free TLS / SSL certificates for UniFi Consoles V4.0.x and V3.2.x
+# Valid and free TLS / SSL certificates for UniFi Consoles V4.1.13 and V3.2.x
 
-Last update: December 24, 2024.
+Last and final update: March 14, 2025.
+
+OK folks, sorry to disappoint but I've had it, as with the introduction of new hardware (Dream Router etc.) the foundation has been broken - again. I'm not a professional user (or programmer) and neither have time or the need to help a commercial company fixing their security.
+
+Thanks to all those who helped making this work! As of March 14, 2025, this is archived. I can only point you in the direction of Glenn R.'s [UniFi Easy Encrypt](https://glennr.nl/s/unifi-lets-encrypt) script.
+
+## \### NO USER SERVICEABLE PARTS BEYOND THIS POINT \###
 
 *Public Service Announcement:* In its best tradition, UI has established some new, of course undocumented, black magic around valid SSL certificates. This project here tries to cope with this new twist. Web frontend and Hotspot are covered now, and WiFiMan will be toasted as soon as you use custom SSL certificates. This has been officially acknowledged by UI. Right now, RADIUS ~~will still not work~~ can be fixed manually as described [here](https://github.com/alxwolf/ubios-cert/wiki/RADIUS-certificates).
 
-With 4.1.x, UI has *again* changed the way they handle certificates, but still not implemented in a proper way. So right now, 4.1 (in Early Access as of writing) is not supported.
+With 4.1.x, UI has *again* changed the way they handle certificates, but still not implemented in a proper way. 4.1 is supported on UniFi OS - Dream Machines 4.1.13
 
 I suggest you give Glenn R.'s [monster scripts](https://glennr.nl/s/unifi-lets-encrypt) a try - if you can. He's on the [UI community forums](https://community.ui.com/questions/UniFi-Installation-Scripts-or-UniFi-Easy-Update-Script-or-UniFi-Lets-Encrypt-or-UniFi-Easy-Encrypt-/ccbc7530-dd61-40a7-82ec-22b17f027776) and obviously knows extremely well what needs to be done, but is not willing to address the request for certificates issued with DNS-Challenge. Coincidently, he seems to work for UI and there is a UI team member called *UI-Glenn*.
 
@@ -206,4 +212,4 @@ A huge "Thank You" goes to
 
 ## UniFi OS and Network Controller Versions
 
-Confirmed to work on UniFi OS Version 4.0.x and Network Version 8.5.6
+Confirmed to work on UniFi OS Version 4.1.13 and Network Version 9.0.114
